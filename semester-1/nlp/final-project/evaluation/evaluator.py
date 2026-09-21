@@ -10,7 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class SearchEvaluator:
-    """搜索性能评估器"""
+    """Measures retrieval and generation latency separately.
+
+    Drives WorkflowEngine.retrieve() and WorkflowEngine.synthesize() directly
+    so the two phases can be timed apart.
+    """
 
     def __init__(self, search_engine):
         self.search_engine = search_engine
@@ -30,37 +34,33 @@ class SearchEvaluator:
         for i, question in enumerate(questions, 1):
             print(f"处理问题 {i}/{len(questions)}: {question[:50]}...")
 
-            # 记录搜索时间（到获取信息为止）
+            # Phase 1: retrieval only, no LLM call.
             search_start_time = time.time()
+            retrieval_results = self.search_engine.retrieve(question)
+            search_duration = time.time() - search_start_time
 
-            # 执行搜索处理（不包括最终LLM生成）
-            intent_result = self.search_engine.intent_recognizer.recognize_intent(question)
-            retrieval_results = self.search_engine._retrieve_information(question, intent_result)
-
-            search_end_time = time.time()
-            search_duration = search_end_time - search_start_time
-
-            # 记录总处理时间（包括LLM生成）
+            # Phase 2: LLM synthesis.
             total_start_time = time.time()
+            synthesis = self.search_engine.synthesize(question, retrieval_results)
+            total_duration = time.time() - total_start_time
 
-            final_answer = self.search_engine._generate_answer(question, intent_result, retrieval_results)
-
-            total_end_time = time.time()
-            total_duration = total_end_time - total_start_time
-
-            # 合并时间
             total_processing_time = search_duration + total_duration
+
+            final_answer = synthesis.get("final_answer", {}).get("answer", "")
+            intent_result = retrieval_results.get("metadata", {}).get("intent", {})
+            content = retrieval_results.get("content") or []
+            retrieval_count = len(content) if isinstance(content, list) else 1
 
             result = {
                 "question": question,
                 "description": descriptions[i - 1] if descriptions else "",
                 "intent": intent_result,
-                "retrieval_count": retrieval_results.get("count", 0),
+                "retrieval_count": retrieval_count,
                 "answer": final_answer,
-                "search_time": search_duration,  # 仅搜索时间
-                "generation_time": total_duration,  # LLM生成时间
-                "total_time": total_processing_time,  # 总时间
-                "success": True
+                "search_time": search_duration,
+                "generation_time": total_duration,
+                "total_time": total_processing_time,
+                "success": bool(final_answer)
             }
 
             results.append(result)
@@ -96,6 +96,22 @@ class SearchEvaluator:
                               results: List[Dict]) -> Dict[str, Any]:
         """计算统计信息"""
         successful_results = [r for r in results if r.get("success", False)]
+
+        if not results or not search_times or not total_times:
+            return {
+                "total_questions": 0,
+                "successful_questions": 0,
+                "success_rate": 0.0,
+                "mean_search_time": 0.0,
+                "median_search_time": 0.0,
+                "min_search_time": 0.0,
+                "max_search_time": 0.0,
+                "mean_total_time": 0.0,
+                "median_total_time": 0.0,
+                "min_total_time": 0.0,
+                "max_total_time": 0.0,
+                "mean_retrieval_count": 0.0,
+            }
 
         stats = {
             "total_questions": len(results),
@@ -175,12 +191,13 @@ class SearchEvaluator:
 
         for test_set, data in self.results.items():
             for i, result in enumerate(data["results"]):
+                intent = result.get("intent") or {}
                 rows.append({
                     "test_set": test_set,
                     "question_id": i + 1,
                     "question": result["question"],
-                    "intent": result["intent"]["intent"],
-                    "intent_confidence": result["intent"]["confidence"],
+                    "intent": intent.get("intent", ""),
+                    "intent_confidence": intent.get("confidence", ""),
                     "retrieval_count": result["retrieval_count"],
                     "search_time": result["search_time"],
                     "generation_time": result["generation_time"],

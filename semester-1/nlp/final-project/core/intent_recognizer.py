@@ -3,15 +3,14 @@ from typing import Dict, List
 
 
 class IntentRecognizer:
-    """
-    超强增强版智能意图识别器
-    支持：
-        - 金融 Finance
-        - 天气 Weather
-        - 交通 / POI / 地址 Navigation / Transport
-        - Web 搜索（新闻 / 热点）
-        - 多模态 multimodal
-    全部关键词已扩充：英文 + 繁体中文 + 简体中文
+    """Keyword-scored intent classifier.
+
+    Recognised intents: finance, weather, transport, web_search, math,
+    multimodal, and a knowledge fallback. Keyword tables cover English,
+    Simplified Chinese, and Traditional Chinese.
+
+    The returned label must stay in sync with the branch names in
+    WorkflowEngine.retrieve().
     """
 
     def __init__(self):
@@ -49,11 +48,13 @@ class IntentRecognizer:
             "紫外线", "紫外線",
             "晴天", "多云", "多雲", "阴天", "陰天",
 
-            # Time-related
+            # Time-qualified weather phrasings.
+            # Bare time words ("今天", "明天") are deliberately NOT listed:
+            # they appear in every domain and used to drag unrelated queries
+            # such as "今天股价怎么样" into the weather branch.
             "今天天气", "今日天气", "今日天氣",
             "明天天气", "明日天气", "明日天氣",
-            "今天", "今日", "明天", "明日", "後天", "后天",
-            "上午", "下午", "晚上", "今晚", "明早", "明晚",
+            "後天天氣", "后天天气",
 
             # English
             "weather", "forecast", "temperature", "humidity",
@@ -118,6 +119,17 @@ class IntentRecognizer:
             "image", "picture", "photo", "recognize"
         ]
 
+        # ======================================================
+        # Math / calculator
+        # ======================================================
+        self.math_keywords = [
+            "计算", "計算", "算一下", "等于多少", "等於多少",
+            "求和", "平方根", "开方", "開方", "百分之",
+            "calculate", "compute", "square root", "equals",
+        ]
+        # Bare arithmetic such as "12 * (3 + 4)" or "1+1=?"
+        self.arithmetic_pattern = re.compile(r"\d+\s*[\+\-\*/×÷\^]\s*\d+")
+
 
     # -------------------------------------------------
     # Keyword scoring
@@ -162,6 +174,7 @@ class IntentRecognizer:
             "weather": 0,
             "transport": 0,
             "web_search": 0,
+            "math": 0,
             "general": 0.1
         }
 
@@ -174,6 +187,10 @@ class IntentRecognizer:
         scores["transport"] += self.score_keywords(q, self.location_keywords)
 
         scores["web_search"] += self.score_keywords(q, self.search_keywords)
+
+        scores["math"] += self.score_keywords(q, self.math_keywords, 1.2)
+        if self.arithmetic_pattern.search(q):
+            scores["math"] += 1.5
 
         # A→B 路线
         if ("从" in q or "從" in q) and ("到" in q):
@@ -198,26 +215,10 @@ class IntentRecognizer:
         best = max(scores, key=scores.get)
         best_score = scores[best]
 
-        if best == "finance":
+        if best in ("finance", "weather", "transport", "math"):
             return {
-                "intent": "finance",
-                "domains": ["finance"],
-                "confidence": min(1.0, 0.7 + best_score * 0.1),
-                "requires_web_search": False
-            }
-
-        if best == "weather":
-            return {
-                "intent": "weather",
-                "domains": ["weather"],
-                "confidence": min(1.0, 0.7 + best_score * 0.1),
-                "requires_web_search": False
-            }
-
-        if best == "transport":
-            return {
-                "intent": "transport",
-                "domains": ["transport"],
+                "intent": best,
+                "domains": [best],
                 "confidence": min(1.0, 0.7 + best_score * 0.1),
                 "requires_web_search": False
             }
@@ -230,16 +231,18 @@ class IntentRecognizer:
                 "requires_web_search": True
             }
 
-        # fallback
+        # Fallback. The label must match the branch names in WorkflowEngine.
         return {
-            "intent": "general_knowledge",
+            "intent": "knowledge",
             "domains": [],
             "confidence": 0.5,
             "requires_web_search": False
         }
 
+    def recognize(self, query: str, has_file: bool = False) -> Dict:
+        """Alias kept for older call sites.
 
-    # 兼容旧接口
-    def recognize(self, query: str, has_file: bool = False):
-        info = self.recognize_intent(query, has_file)
-        return {"intent": info.get("intent", "general_knowledge")}
+        Returns the full result; earlier versions dropped everything but the
+        label, which discarded the confidence score computed above.
+        """
+        return self.recognize_intent(query, has_file)

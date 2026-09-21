@@ -68,8 +68,8 @@ def test_alpha_vantage():
 
 def test_baidu_map():
     """测试 Baidu Map API (距离矩阵示例)"""
-    if Config.BAIDU_MAP_API_KEY == "demo_mode":
-        return False, "跳过: 未配置密钥 (demo_mode)", None
+    if not Config.BAIDU_MAP_API_KEY:
+        return False, "跳过: 未配置 BAIDU_MAP_API_KEY", None
     try:
         url = f"https://api.map.baidu.com/directionlite/v1/driving?origin=40.56,116.31&destination=40.55,116.30&ak={Config.BAIDU_MAP_API_KEY}"
         response = requests.get(url, timeout=10)

@@ -14,16 +14,18 @@ import signal
 import json
 import re
 
-from multimodal.multimodal_router import MultimodalRouter
-from multimodal.docx_processor import DocxProcessor
-
-# 修复导入路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from config import Config, ensure_runtime_dirs
+from multimodal.multimodal_router import MultimodalRouter
+from multimodal.docx_processor import DocxProcessor
 from core.workflow_engine import WorkflowEngine
 from core.llm_client import llm_client
 
-# 配置日志
+# Logging writes into logs/, so the directory has to exist before the handler
+# is attached. Importing a module no longer creates it as a side effect.
+ensure_runtime_dirs()
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -197,6 +199,11 @@ def main():
 
     print("进入 main()...")
 
+    if not Config.has_llm_credentials():
+        print("未配置 HKGAI_API_KEY。请复制 .env.example 为 .env 并填入密钥。")
+        logger.error("HKGAI_API_KEY 未配置")
+        return
+
     # 初始化工作流引擎
     try:
         engine = WorkflowEngine()
@@ -219,6 +226,34 @@ def main():
         return
 
     print("知识库初始化成功（支持中英文查询）")
+
+    # 评估模式
+    if args.evaluate:
+        from evaluation.evaluator import SearchEvaluator
+
+        evaluator = SearchEvaluator(engine)
+
+        docx_dir = "data/test_questions"
+        test_docs = sorted(
+            f for f in os.listdir(docx_dir) if f.endswith(".docx")
+        ) if os.path.isdir(docx_dir) else []
+
+        if not test_docs:
+            print(f"未在 {docx_dir} 找到 .docx 测试集，无法评估。")
+            return
+
+        for doc in test_docs:
+            questions = load_test_questions(os.path.join(docx_dir, doc))
+            if not questions:
+                print(f"跳过 {doc}：未提取到问题。")
+                continue
+            evaluator.evaluate_test_set(doc, questions)
+
+        if evaluator.results:
+            evaluator.generate_report()
+        else:
+            print("没有可用的评估结果。")
+        return
 
     # 批量处理模式（核心新增功能）
     if args.batch:

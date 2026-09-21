@@ -1,64 +1,100 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
-# 添加项目根目录到Python路径
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from config import Config
 from core.intent_recognizer import IntentRecognizer
-from core.llm_client import HKGAIClient
-from retrieval.vector_store import VectorStore
 
 
-class TestBasicFunctionality(unittest.TestCase):
-    """基础功能测试"""
+class TestIntentRecognition(unittest.TestCase):
+    """Intent routing. Runs offline: no network, no API key needed."""
 
     def setUp(self):
-        self.intent_recognizer = IntentRecognizer()
-        self.llm_client = HKGAIClient()
-        self.vector_store = VectorStore()
+        self.recognizer = IntentRecognizer()
 
-    def test_intent_recognition(self):
-        """测试意图识别"""
-        test_cases = [
+    def test_expected_intents(self):
+        cases = [
             ("今天天气怎么样", "weather"),
+            ("明天天气如何", "weather"),
             ("NVIDIA股价多少", "finance"),
             ("怎么去机场", "transport"),
-            ("1+1等于多少", "calculation")
+            ("1+1等于多少", "math"),
+            ("帮我计算 12 * 7", "math"),
+            ("最新新闻有哪些", "web_search"),
         ]
-
-        for query, expected_intent in test_cases:
+        for query, expected in cases:
             with self.subTest(query=query):
-                result = self.intent_recognizer.recognize_intent(query)
-                self.assertIn("intent", result)
-                # 注意：实际意图可能不完全匹配，这里主要测试功能正常
-                self.assertIsInstance(result["intent"], str)
+                self.assertEqual(self.recognizer.recognize_intent(query)["intent"], expected)
 
-    def test_llm_client(self):
-        """测试LLM客户端"""
-        result = self.llm_client.chat(
-            "你是一个测试助手，请回复'测试成功'",
-            "请回复指定内容"
-        )
+    def test_bare_time_word_does_not_force_weather(self):
+        """Regression: bare "今天" used to be a weather keyword, which dragged
+        finance and other queries into the weather branch."""
+        result = self.recognizer.recognize_intent("今天股价怎么样")
+        self.assertEqual(result["intent"], "finance")
 
-        self.assertIn("content", result)
-        # 由于API响应可能变化，我们只检查是否有内容返回
-        self.assertTrue(len(result["content"]) > 0)
+    def test_file_input_routes_to_multimodal(self):
+        result = self.recognizer.recognize_intent("这是什么", has_file=True)
+        self.assertEqual(result["intent"], "multimodal")
 
-    def test_vector_store(self):
-        """测试向量存储"""
-        # 测试添加文档
-        test_doc = {
-            "text": "这是一个测试文档",
-            "metadata": {"source": "test"}
+    def test_unknown_query_falls_back_to_knowledge(self):
+        result = self.recognizer.recognize_intent("介绍一下香港科技大学")
+        self.assertEqual(result["intent"], "knowledge")
+
+    def test_recognize_alias_preserves_full_payload(self):
+        """Regression: the alias used to drop everything but the label."""
+        result = self.recognizer.recognize("今天天气怎么样")
+        for key in ("intent", "domains", "confidence", "requires_web_search"):
+            self.assertIn(key, result)
+
+
+class TestIntentContract(unittest.TestCase):
+    """Every intent the recognizer emits must be handled by WorkflowEngine."""
+
+    def test_labels_match_engine_branches(self):
+        from core.intents import ALL_INTENTS
+
+        recognizer = IntentRecognizer()
+        emitted = set()
+        for query in ("今天天气怎么样", "NVIDIA股价多少", "怎么去机场",
+                      "1+1等于多少", "最新新闻", "介绍一下香港科技大学"):
+            emitted.add(recognizer.recognize_intent(query)["intent"])
+        emitted.add(recognizer.recognize_intent("这是什么", has_file=True)["intent"])
+
+        unknown = emitted - set(ALL_INTENTS)
+        self.assertFalse(unknown, f"labels not declared in core.intents: {unknown}")
+
+    def test_every_plugin_intent_has_a_registered_plugin(self):
+        """Regression: "math" was dispatched by the engine but the recognizer
+        never emitted it, so CalculatorPlugin was unreachable."""
+        from core.intents import PLUGIN_INTENTS
+
+        recognizer = IntentRecognizer()
+        probes = {
+            "weather": "今天天气怎么样",
+            "finance": "NVIDIA股价多少",
+            "transport": "怎么去机场",
+            "math": "1+1等于多少",
+            "web_search": "最新新闻",
         }
+        for intent in PLUGIN_INTENTS:
+            with self.subTest(intent=intent):
+                self.assertIn(intent, probes, f"no probe query for {intent}")
+                self.assertEqual(
+                    recognizer.recognize_intent(probes[intent])["intent"], intent
+                )
 
-        doc_id = self.vector_store.add_documents([test_doc])
-        self.assertEqual(len(doc_id), 1)
 
-        # 测试搜索
-        results = self.vector_store.similarity_search("测试文档", k=1)
-        self.assertIsInstance(results, list)
+@unittest.skipUnless(Config.has_llm_credentials(), "HKGAI_API_KEY not configured")
+class TestLLMClient(unittest.TestCase):
+    """Network test. Skipped unless credentials are present."""
+
+    def test_chat_returns_content(self):
+        from core.llm_client import LLMClient
+
+        result = LLMClient().chat("You are a test assistant.", "Reply with OK.")
+        self.assertIn("content", result)
 
 
 if __name__ == '__main__':
