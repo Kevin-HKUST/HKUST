@@ -1,14 +1,17 @@
-# CV — Computer Vision
+# MAIE 5421 — Computer Vision
 
-Course codes: MAIE5421 / ARIN5201 · Semester 1
+Semester 1, Fall 2025. Co-listed as ARIN 5201.
 
 ## Contents
 
 | File | Description |
 |---|---|
+| `assignment-1.pdf` | Assignment 1 — written solution |
+| `assignment-2-data.xlsx` | Assignment 2 — input data |
 | `assignment-3-gan.ipynb` | Assignment 3 — generative adversarial network, with training output retained |
-| `assignment-2-data.xlsx` | Input data for Assignment 2 |
+| `project-proposal.pdf` | Term project proposal |
+| `project-video-style-transfer.pdf` | Term project — video style transfer |
 
 ## Not included
 
-Assignments 1 and 2 were submitted as written PDFs, and the term project (a video style transfer study, with its proposal) was likewise a report. Those PDFs carry my name and student ID, so they are kept offline. Assignment handouts belong to the course staff and are not redistributed.
+Assignment handouts and the project brief belong to the course staff and are not redistributed.

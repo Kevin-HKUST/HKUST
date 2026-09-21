@@ -1,6 +1,6 @@
-# MLS — Machine Learning Systems
+# MAIE 5532 — Machine Learning System
 
-Semester 1. The course deliverable was the FedCough term project, documented below. The accompanying slide deck was a presentation PDF and is kept offline.
+Semester 1, Fall 2025. The course deliverable was the FedCough term project, documented below. `presentation.pdf` is the accompanying slide deck.
 
 ---
 

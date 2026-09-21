@@ -1,6 +1,6 @@
-# PAI — Programming for AI
+# MAIE 5101 — Programming for Artificial Intelligence
 
-Course code: MAIE5101 · Semester 2
+Semester 2, Spring 2026. A core course of the MSc(AIE) program, covering NumPy, Matplotlib, and Pandas alongside deep learning in PyTorch.
 
 ## Contents
 
@@ -10,6 +10,7 @@ Course code: MAIE5101 · Semester 2
 | [`assignment-1/climate-analysis/`](assignment-1/climate-analysis) | Climate data analysis functions |
 | [`assignment-2/`](assignment-2) | Pandas analysis of Australian weather data — `analysis.py` and `maie-pa2.ipynb` |
 | [`assignment-3/`](assignment-3) | Image colorisation with PyTorch — `colorization.py`, `models.py`, the notebook, and the loss curves |
+| `notes.pdf` | My course notes |
 
 Each assignment-1 exercise keeps its `sample-output.txt` so the expected behaviour is visible without running the code.
 
@@ -24,4 +25,4 @@ The trained checkpoint `best_model.pth` is also excluded; rerun training to rege
 
 ## Not included
 
-Eighteen lecture decks, the sample exam paper, and my course notes. The slides belong to the course staff.
+Eighteen lecture decks and the sample exam paper belong to the course staff and are not redistributed.

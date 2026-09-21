@@ -1,6 +1,6 @@
-# NLP — Natural Language Processing
+# MAIE 5221 — Natural Language Processing
 
-Semester 1
+Semester 1, Fall 2025
 
 ## Contents
 

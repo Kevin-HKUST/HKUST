@@ -1,28 +1,47 @@
-# HKUST — MSc Coursework
+# HKUST — MSc in AI and Entrepreneurship
 
-Code and project artifacts from ten graduate courses at HKUST, organised by semester.
+Coursework from the [MSc(AIE)](https://seng.hkust.edu.hk/academics/taught-postgraduate/msc-aie/course-list) program at HKUST School of Engineering: source code, notebooks, reports, and project deliverables from ten courses across two semesters.
 
-## What is in here
+## Courses
 
-| | Semester 1 | Semester 2 |
+### Semester 1 — Fall 2025
+
+| Dir | Code | Course |
 |---|---|---|
-| 1 | [CV — Computer Vision](semester-1/cv) | [AIF — AI Fundamentals](semester-2/aif) |
-| 2 | [EAI — Ethics and AI](semester-1/eai) | [EM — Engineering Management Seminars](semester-2/em) |
-| 3 | [ML — Machine Learning](semester-1/ml) | [GAIF — Generative AI in Finance](semester-2/gaif) |
-| 4 | [MLS — Machine Learning Systems](semester-1/mls) | [PAI — Programming for AI](semester-2/pai) |
-| 5 | [NLP — Natural Language Processing](semester-1/nlp) | [SUS — Sustainability](semester-2/sus) |
+| [`cv`](semester-1/cv) | MAIE 5421 | Computer Vision |
+| [`eai`](semester-1/eai) | MAIE 5103 | Artificial Intelligence Ethics |
+| [`ml`](semester-1/ml) | MAIE 5212 | Machine Learning |
+| [`mls`](semester-1/mls) | MAIE 5532 | Machine Learning System |
+| [`nlp`](semester-1/nlp) | MAIE 5221 | Natural Language Processing |
 
-## Scope and exclusions
+### Semester 2 — Spring 2026
 
-This repository holds **only my own work**: source code, notebooks, generated figures, and small input files.
+| Dir | Code | Course |
+|---|---|---|
+| [`aif`](semester-2/aif) | MAIE 5102 | AI Fundamentals: Concepts and Methods |
+| [`em`](semester-2/em) | MAIE 5534 | Entrepreneurial Me |
+| [`gaif`](semester-2/gaif) | MAIE 6000B | Generative AI in Finance |
+| [`pai`](semester-2/pai) | MAIE 5101 | Programming for Artificial Intelligence |
+| [`sus`](semester-2/sus) | MAIE 5535 | Startup Seminars for AI |
 
-Deliberately excluded:
+MAIE 5101, 5102, and 5103 are the program's core courses; the rest are electives.
 
-- **Lecture slides, handouts, and exam papers.** Copyright belongs to the instructors and HKUST, so they are not redistributed here.
-- **Report PDFs.** My submitted reports embed my name and student ID, so they are kept offline.
+## Highlights
+
+- **[NLP term project](semester-1/nlp/final-project)** — an LLM-backed search engine with intent recognition, RAG retrieval, domain plugins, and multimodal input handling
+- **[FedCough](semester-1/mls)** — federated learning for cough classification, with a centralized baseline for comparison
+- **[Computer Vision project](semester-1/cv)** — video style transfer
+- **[Generative AI in Finance mini-project](semester-2/gaif/mini-project)** — presentation deliverable, viewable in the browser
+
+## Scope
+
+This repository holds **my own work**: source code, notebooks, generated figures, written reports, and presentation decks.
+
+Excluded by design:
+
+- **Lecture slides, assignment handouts, and exam papers.** Copyright belongs to the instructors and HKUST, so they are not redistributed here.
+- **Third-party papers** discussed in coursework.
 - **Datasets and model weights.** CIFAR-10, `weatherAUS.csv`, HuggingFace caches, and `.pth` checkpoints are excluded by `.gitignore`. Each course README explains how to obtain them.
-
-Some courses therefore contain a README only — their deliverables were written reports rather than code.
 
 ## Running the code
 

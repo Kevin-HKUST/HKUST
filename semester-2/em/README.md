@@ -1,9 +1,14 @@
-# EM — Engineering Management Seminars
+# MAIE 5534 — Entrepreneurial Me
 
-Semester 2
+Semester 2, Spring 2026
 
 ## Contents
 
-No code. Assessment was three written seminar reports plus a short supplementary document.
+| File | Description |
+|---|---|
+| `seminar-report-1.pdf` | Seminar report 1 |
+| `seminar-report-2.pdf` | Seminar report 2 |
+| `seminar-report-3.pdf` | Seminar report 3 |
+| `sessions-6-7.docx` | Notes and responses for sessions VI–VII |
 
-The files carry my name, so they are kept offline rather than published here. This directory exists to keep the ten-course layout complete.
+No code: the course was assessed by written reflection on seminar sessions.

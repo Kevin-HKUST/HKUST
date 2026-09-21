@@ -1,9 +1,11 @@
-# EAI — Ethics and AI
+# MAIE 5103 — Artificial Intelligence Ethics
 
-Semester 1
+Semester 1, Fall 2025. A core course of the MSc(AIE) program, covering the societal impact of AI and the ethical dilemmas around privacy, bias, transparency, and accountability.
 
 ## Contents
 
-No code. The single deliverable was a group literature survey on **the right to be forgotten**, submitted as a written report.
+| File | Description |
+|---|---|
+| `right-to-be-forgotten-literature-survey.pdf` | Group literature survey on the right to be forgotten |
 
-The PDF embeds author names, so it is kept offline rather than published here. This directory exists to keep the ten-course layout complete.
+No code: the course was assessed by written work.
