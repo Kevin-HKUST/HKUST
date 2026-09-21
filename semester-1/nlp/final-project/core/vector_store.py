@@ -1,118 +1,68 @@
-import os
-import json
-import shutil
 import logging
-from typing import List, Dict, Any
+import os
+import shutil
+from typing import Any, Dict, List, Optional
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_core.documents import Document
-from config import Config  # 导入配置
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from config import Config
+from core.knowledge_sources import KNOWLEDGE_DIR, KNOWLEDGE_JSON, collect_source_texts
 
 logger = logging.getLogger(__name__)
 
+INDEX_DIR = os.path.join("data", "faiss_index")
+
+
 class VectorStore:
-    """
-    改进版 VectorStore：
-    - 兼容旧 search() API
-    - 支持 FAISS 持久化存储
-    - 支持新增文档 add_documents()
-    - 自动加载 data/knowledge.json
+    """LangChain + FAISS store used by the live query path.
+
+    Seeds itself from ``data/knowledge_base`` when no persisted index exists.
+    ``rebuild()`` discards the on-disk index and reseeds from those files.
     """
 
-    def __init__(self,
-                 data_path="data/knowledge.json",
-                 db_path="data/faiss_index",
-                 chunk_size=300,
-                 chunk_overlap=40):
-
-        self.data_path = data_path
+    def __init__(
+        self,
+        knowledge_dir: str = KNOWLEDGE_DIR,
+        json_path: str = KNOWLEDGE_JSON,
+        db_path: str = INDEX_DIR,
+        chunk_size: Optional[int] = None,
+        chunk_overlap: Optional[int] = None,
+    ):
+        self.knowledge_dir = knowledge_dir
+        self.json_path = json_path
         self.db_path = db_path
-
-        # Embedding 模型（移除 mirror 参数，保留缓存目录）
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size or Config.CHUNK_SIZE,
+            chunk_overlap=chunk_overlap or Config.CHUNK_OVERLAP,
+        )
         self.embedding_model = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={
-                "device": "cpu",
-                "trust_remote_code": True
-            },
-            cache_folder=os.path.join("data", "embedding_cache")  # 缓存目录
+            model_kwargs={"device": "cpu", "trust_remote_code": True},
+            cache_folder=os.path.join("data", "embedding_cache"),
         )
-
-        # 切分器
-        self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap
-        )
-
-        # 尝试加载 FAISS 索引
         self.vectorstore = self._load_index()
+        if self.vectorstore is None:
+            self._seed_from_sources()
 
-        # 如果没有 index，则尝试导入 knowledge.json
-        if self.vectorstore is None and os.path.exists(self.data_path):
-            self._load_knowledge_json()
+    def rebuild(self) -> int:
+        """Delete the persisted index and rebuild it from source files."""
+        self.delete_collection()
+        return self._seed_from_sources()
 
-    # -----------------------
-    # 加载 FAISS 索引
-    # -----------------------
-    def _load_index(self):
-        if os.path.exists(self.db_path):
-            try:
-                return FAISS.load_local(
-                    self.db_path,
-                    self.embedding_model,
-                    allow_dangerous_deserialization=True
-                )
-            except Exception as e:
-                logger.error(f"[VectorStore] 加载 FAISS 失败: {e}")
-        return None
-
-    # -----------------------
-    # 导入旧版 JSON 知识库
-    # -----------------------
-    def _load_knowledge_json(self):
-        try:
-            with open(self.data_path, "r", encoding="utf-8") as f:
-                docs = json.load(f)
-
-            documents = []
-            for d in docs:
-                text = d.get("text", "")
-                if not text:
-                    continue
-                documents.extend(self.text_splitter.create_documents([text]))
-
-            if not documents:
-                logger.warning("[VectorStore] 空 knowledge.json")
-                return
-
-            self.vectorstore = FAISS.from_documents(
-                documents, self.embedding_model
-            )
-            self.vectorstore.save_local(self.db_path)
-
-            logger.info(f"[VectorStore] 已加载 {len(documents)} 条知识片段")
-
-        except Exception as e:
-            logger.error(f"[VectorStore] JSON 加载失败: {e}")
-
-    # -----------------------
-    # 新增文档
-    # -----------------------
-    def add_documents(self, docs: List[Dict[str, Any]]):
+    def add_documents(self, docs: List[Dict[str, Any]]) -> List[str]:
         if not docs:
             return []
 
         chunks = []
-        for d in docs:
-            text = d.get("text", "")
-            md = d.get("metadata", {})
+        for item in docs:
+            text = item.get("text", "")
+            metadata = item.get("metadata", {})
             if not text:
                 continue
-
             chunks.extend(
-                self.text_splitter.create_documents([text], metadatas=[md])
+                self.text_splitter.create_documents([text], metadatas=[metadata])
             )
 
         if not chunks:
@@ -124,35 +74,54 @@ class VectorStore:
             self.vectorstore.add_documents(chunks)
 
         self.vectorstore.save_local(self.db_path)
+        return [chunk.metadata.get("id", "") for chunk in chunks]
 
-        return [c.metadata.get("id", "") for c in chunks]
-
-    # -----------------------
-    # search() —— 兼容旧系统 API
-    # -----------------------
-    def search(self, query: str, top_k=3):
+    def search(self, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
         if self.vectorstore is None:
-            logger.warning("[VectorStore] 空向量库")
+            logger.warning("[VectorStore] empty index")
             return []
-
         try:
             results = self.vectorstore.similarity_search(query, k=top_k)
             return [
-                {
-                    "text": r.page_content,
-                    "metadata": r.metadata,
-                }
-                for r in results
+                {"text": result.page_content, "metadata": result.metadata}
+                for result in results
             ]
-        except Exception as e:
-            logger.error(f"[VectorStore] 检索失败: {e}")
+        except Exception as exc:
+            logger.error("[VectorStore] search failed: %s", exc)
             return []
 
-    # -----------------------
-    # 删除整个 index
-    # -----------------------
-    def delete_collection(self):
+    def delete_collection(self) -> None:
         if os.path.exists(self.db_path):
             shutil.rmtree(self.db_path)
         self.vectorstore = None
-        logger.info("[VectorStore] 已删除向量库")
+        logger.info("[VectorStore] deleted index")
+
+    def _load_index(self):
+        if not os.path.exists(self.db_path):
+            return None
+        try:
+            return FAISS.load_local(
+                self.db_path,
+                self.embedding_model,
+                allow_dangerous_deserialization=True,
+            )
+        except Exception as exc:
+            logger.error("[VectorStore] failed to load FAISS index: %s", exc)
+            return None
+
+    def _seed_from_sources(self) -> int:
+        texts = collect_source_texts(self.knowledge_dir, self.json_path)
+        if not texts:
+            logger.warning(
+                "[VectorStore] no seed documents under %s or %s",
+                self.knowledge_dir,
+                self.json_path,
+            )
+            return 0
+
+        chunks = self.text_splitter.create_documents(texts)
+        self.vectorstore = FAISS.from_documents(chunks, self.embedding_model)
+        os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
+        self.vectorstore.save_local(self.db_path)
+        logger.info("[VectorStore] seeded %s chunks", len(chunks))
+        return len(chunks)

@@ -17,6 +17,7 @@ weatherAUS.csv
 *.safetensors
 *.ckpt
 embedding_cache/
+faiss_index/
 vector_db/
 *.sqlite3
 *.index

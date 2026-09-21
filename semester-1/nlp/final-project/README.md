@@ -18,7 +18,7 @@ query ──▶ parse multimodal prefix ──▶ OCR (if an image was attached)
 |---|---|
 | Intent routing | Keyword scoring across English, Simplified, and Traditional Chinese. Labels live in `core/intents.py` and are shared by the recognizer and the engine. |
 | Plugins | `weather`, `finance`, `transport`, `web_search`, `math`. Registry is asserted against `PLUGIN_INTENTS` at construction. |
-| Retrieval | FAISS via LangChain (`core/vector_store.py`), persisted under `data/faiss_index`. Empty index falls back to web search. |
+| Retrieval | FAISS via LangChain (`core/vector_store.py`), persisted under `data/faiss_index`. Seeded from `data/knowledge_base/` (the fictional knowledge-base markdown ships in the repo). Empty index falls back to web search. |
 | Multimodal | Google Vision OCR for images; PyMuPDF for PDF; python-docx for Word. |
 | Evaluation | `--evaluate` runs every `.docx` in `data/test_questions/` and writes JSON, text, and CSV reports to `evaluation_results/`. |
 | Batch QA | `--batch in.docx out.json` answers every question in a document and reports success rate and timings. |
@@ -41,7 +41,7 @@ python main.py --interactive              # interactive session
 python main.py --query "your question"    # one-shot query
 python main.py --batch in.docx out.json   # batch question answering
 python main.py --evaluate                 # timing and success-rate report
-python main.py --rebuild_rag              # rebuild the standalone RAG index
+python main.py --rebuild_rag              # rebuild the FAISS index from data/knowledge_base
 ```
 
 Multimodal queries name a file inline, either `[Input: hkust.png] "what is this"` or `hkust.png | what is this`.
@@ -58,9 +58,8 @@ The suite runs offline with no dependencies installed and no API key: it covers 
 
 ## Known limitations
 
-- **Two retrieval implementations coexist.** `core/vector_store.py` (LangChain + FAISS) serves the query path; `core/rag_engine.py` (raw FAISS + SentenceTransformer) backs only `--rebuild_rag` and writes a separate index. They are not interchangeable and should be consolidated.
-- **`VectorStore` seeds from `data/knowledge.json`**, which is not in the repository. Without it, and without a prebuilt `data/faiss_index`, local retrieval returns nothing and every knowledge query falls through to web search.
 - Answer quality scoring in `main.py` is a length-and-keyword heuristic, not a real relevance metric.
+- `--evaluate` looks for `.docx` files under `data/test_questions/`, which are not published with the source.
 
 ## Fixed after submission
 
@@ -77,5 +76,6 @@ This project was reviewed after the fact and the following defects were correcte
 - `config.py` disabled TLS verification process-wide (`ssl._create_default_https_context = _create_unverified_context`) and created five directories as an import side effect. Both removed; directory creation is now an explicit `ensure_runtime_dirs()` call from the entry point.
 - `--evaluate` was declared in the argument parser but never handled, and `SearchEvaluator` called two `WorkflowEngine` methods that did not exist. The flag now works against the `retrieve()` / `synthesize()` seam.
 - `Config.BAIDU_MAP_API_KEY` was read by the API checker but never defined.
-- Deleted as superseded and unreferenced: `api.py` (duplicate LLM client), `core/response_generator.py`, `retrieval/document_processor.py`, `retrieval/reranker.py`, `utils/cache.py`, `utils/metrics.py`, `utils/logger.py`, `plugins/knowledge_plugin.py` (a no-op stub the engine could not reach). Earlier READMEs advertised reranking, caching, and metrics as features; none of them were wired in.
+- Deleted as superseded and unreferenced: `api.py` (duplicate LLM client), `core/response_generator.py`, `core/rag_engine.py` (a second FAISS stack used only by `--rebuild_rag`), `retrieval/document_processor.py`, `retrieval/reranker.py`, `utils/cache.py`, `utils/metrics.py`, `utils/logger.py`, `plugins/knowledge_plugin.py` (a no-op stub the engine could not reach). Earlier READMEs advertised reranking, caching, and metrics as features; none of them were wired in.
+- `--rebuild_rag` now rebuilds the same LangChain FAISS index the query path uses, seeded from `data/knowledge_base/` (the fictional knowledge-base markdown that actually ships) rather than a missing `knowledge.json`.
 - Ad-hoc scripts named `test_*.py` at the project root would have been collected as tests and would have hit the network. Moved to `scripts/` with descriptive names.

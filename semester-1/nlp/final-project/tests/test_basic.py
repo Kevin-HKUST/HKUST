@@ -49,6 +49,29 @@ class TestIntentRecognition(unittest.TestCase):
             self.assertIn(key, result)
 
 
+class TestKnowledgeSources(unittest.TestCase):
+    """Seed-document collection. Offline: no embeddings, no API key."""
+
+    def test_ships_the_fictional_knowledge_base(self):
+        from core.knowledge_sources import collect_source_texts
+
+        root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        texts = collect_source_texts(
+            knowledge_dir=os.path.join(root, "data", "knowledge_base"),
+            json_path=os.path.join(root, "data", "knowledge.json"),
+        )
+        self.assertTrue(texts, "data/knowledge_base should seed at least one document")
+        self.assertTrue(any("Sereleia" in text for text in texts))
+
+    def test_missing_paths_are_skipped(self):
+        from core.knowledge_sources import collect_source_texts
+
+        self.assertEqual(
+            collect_source_texts(knowledge_dir="no-such-dir", json_path="no-such.json"),
+            [],
+        )
+
+
 class TestIntentContract(unittest.TestCase):
     """Every intent the recognizer emits must be handled by WorkflowEngine."""
 

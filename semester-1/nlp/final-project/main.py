@@ -187,14 +187,13 @@ def main():
                         help="批量模式：输入Word文档路径 输出JSON路径")
     parser.add_argument("--query", type=str, help="单查询模式")
     parser.add_argument("--evaluate", action="store_true", help="评估模式")
-    parser.add_argument("--rebuild_rag", action="store_true", help="重建本地RAG索引")
+    parser.add_argument("--rebuild_rag", action="store_true", help="Rebuild the FAISS index from data/knowledge_base")
     args = parser.parse_args()
 
-    # 重建RAG索引（可选）
     if args.rebuild_rag:
-        from core.rag_engine import RAGEngine
-        RAGEngine().rebuild()
-        print("RAG索引重建完成。")
+        from core.vector_store import VectorStore
+        n_chunks = VectorStore().rebuild()
+        print(f"FAISS index rebuilt ({n_chunks} chunks) from data/knowledge_base.")
         return
 
     print("进入 main()...")
