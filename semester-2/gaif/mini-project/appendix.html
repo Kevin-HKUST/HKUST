@@ -1,0 +1,1701 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appendix Slides | GenAI for AML &amp; Financial Fraud Investigations</title>
+  <style>
+    :root {
+      --slide-w: 1600px;
+      --slide-h: 900px;
+
+      --navy: #17233a;
+      --navy2: #24324a;
+      --gold: #d7ad2f;
+      --gold2: #f2c94c;
+      --light: #f5f7fb;
+      --muted: #667085;
+      --text: #182230;
+      --line: #e4e7ec;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success: #059669;
+      --blue: #2563eb;
+      --green: #059669;
+      --purple: #7c3aed;
+      --orange: #ea580c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      background: #111827;
+      font-family: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body {
+      padding: 32px 0 60px;
+    }
+
+    .deck {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+
+    .slide-frame {
+      position: relative;
+      width: 100%;
+      height: var(--frame-h, 900px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    .slide {
+      position: relative;
+      width: var(--slide-w);
+      height: var(--slide-h);
+      flex: 0 0 auto;
+      overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+      transform-origin: center center;
+      background: #fff;
+    }
+
+    .slide.white {
+      background: #fff;
+    }
+
+    .slide.light {
+      background: var(--light);
+    }
+
+    .slide.dark {
+      background: linear-gradient(135deg, #17233a 0%, #263852 100%);
+      color: #fff;
+    }
+
+    .topbar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(90deg, var(--gold), #f4d35e, var(--navy));
+    }
+
+    .section-label {
+      position: absolute;
+      left: 86px;
+      top: 58px;
+      font-size: 18px;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--gold);
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    h1,
+    h2,
+    h3,
+    p,
+    li,
+    td,
+    th {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    h1 {
+      font-size: 70px;
+      line-height: 1.05;
+      letter-spacing: -2.4px;
+      font-weight: 950;
+    }
+
+    h2 {
+      position: absolute;
+      left: 86px;
+      top: 96px;
+      width: 1240px;
+      font-size: 48px;
+      line-height: 1.12;
+      letter-spacing: -1.2px;
+      color: var(--navy);
+      font-weight: 950;
+    }
+
+    .dark h2 {
+      color: #fff;
+    }
+
+    .slide-desc {
+      position: absolute;
+      left: 86px;
+      top: 164px;
+      width: 1240px;
+      font-size: 23px;
+      line-height: 1.42;
+      color: var(--muted);
+      font-weight: 450;
+    }
+
+    .dark .slide-desc {
+      color: #cbd5e1;
+    }
+
+    .slide-number {
+      position: absolute;
+      right: 42px;
+      bottom: 28px;
+      font-size: 17px;
+      color: #98a2b3;
+      font-weight: 600;
+    }
+
+    .dark .slide-number {
+      color: #94a3b8;
+    }
+
+    .footer-note {
+      position: absolute;
+      left: 86px;
+      bottom: 28px;
+      width: 1100px;
+      font-size: 18px;
+      line-height: 1.35;
+      color: #98a2b3;
+      font-weight: 500;
+    }
+
+    .gold {
+      color: var(--gold);
+    }
+
+    .card {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 28px 30px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+      overflow: hidden;
+    }
+
+    .card.accent {
+      border-top: 7px solid var(--gold);
+    }
+
+    .card h3 {
+      font-size: 29px;
+      line-height: 1.22;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    .card p {
+      font-size: 22px;
+      line-height: 1.45;
+      color: var(--muted);
+      font-weight: 450;
+    }
+
+    .card li {
+      font-size: 21px;
+      line-height: 1.42;
+      color: var(--muted);
+      margin-bottom: 9px;
+      padding-left: 2px;
+    }
+
+    ul,
+    ol {
+      padding-left: 28px;
+    }
+
+    code {
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.88em;
+      font-family: Consolas, Menlo, monospace;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #fff7df;
+      color: #8a6200;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .big-statement {
+      position: absolute;
+      left: 86px;
+      bottom: 72px;
+      width: 1428px;
+      min-height: 86px;
+      background: #fff;
+      border-left: 8px solid var(--gold);
+      border-radius: 18px;
+      padding: 22px 30px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+    }
+
+    .big-statement p {
+      font-size: 25px;
+      line-height: 1.35;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    /* Slide 15 cover */
+    .appendix-title {
+      position: absolute;
+      left: 96px;
+      top: 185px;
+      width: 960px;
+    }
+
+    .appendix-title h1 {
+      color: #fff;
+    }
+
+    .appendix-title p {
+      margin-top: 28px;
+      width: 950px;
+      font-size: 33px;
+      line-height: 1.35;
+      color: #d0d8e4;
+      font-weight: 450;
+    }
+
+    .appendix-card {
+      position: absolute;
+      right: 96px;
+      top: 205px;
+      width: 420px;
+      height: 440px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-left: 7px solid var(--gold);
+      border-radius: 0 22px 22px 0;
+      padding: 34px 36px;
+    }
+
+    .appendix-card h3 {
+      color: #fff;
+      font-size: 30px;
+      line-height: 1.2;
+      font-weight: 900;
+      margin-bottom: 24px;
+    }
+
+    .appendix-card li {
+      color: #cbd5e1;
+      font-size: 23px;
+      line-height: 1.45;
+      margin-bottom: 16px;
+    }
+
+    .appendix-meta {
+      position: absolute;
+      left: 96px;
+      bottom: 86px;
+      font-size: 24px;
+      color: #94a3b8;
+      font-weight: 550;
+    }
+
+    /* Prompt slides */
+    .prompt-grid-2 {
+      position: absolute;
+      left: 86px;
+      top: 244px;
+      width: 1428px;
+      height: 560px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .prompt-card {
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 20px;
+      padding: 30px 34px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .prompt-card.light-code {
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .prompt-card h3 {
+      font-size: 28px;
+      line-height: 1.2;
+      font-weight: 900;
+      color: #f8d45c;
+      margin-bottom: 18px;
+    }
+
+    .prompt-card.light-code h3 {
+      color: var(--navy);
+    }
+
+    .prompt-card p,
+    .prompt-card li {
+      font-size: 20px;
+      line-height: 1.42;
+      color: #d1d5db;
+      margin-bottom: 9px;
+    }
+
+    .prompt-card.light-code p,
+    .prompt-card.light-code li {
+      color: var(--muted);
+    }
+
+    .mini-code {
+      font-family: Consolas, Menlo, monospace;
+      font-size: 18px;
+      line-height: 1.45;
+      color: #d1d5db;
+    }
+
+    .light-code .mini-code {
+      color: #344054;
+    }
+
+    .schema-row {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 16px;
+      margin-bottom: 12px;
+      align-items: start;
+    }
+
+    .schema-label {
+      font-size: 17px;
+      line-height: 1.2;
+      color: var(--gold);
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .schema-text {
+      font-size: 20px;
+      line-height: 1.4;
+      color: #d1d5db;
+    }
+
+    .light-code .schema-text {
+      color: var(--muted);
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 8px 13px;
+      background: #fff7df;
+      color: #8a6200;
+      border-radius: 999px;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    .dark-pill {
+      background: rgba(248, 212, 92, 0.14);
+      color: #f8d45c;
+      border: 1px solid rgba(248, 212, 92, 0.32);
+    }
+
+    .prompt-wide {
+      position: absolute;
+      left: 86px;
+      top: 244px;
+      width: 1428px;
+      height: 560px;
+      display: grid;
+      grid-template-columns: 520px 1fr;
+      gap: 28px;
+    }
+
+    .json-box {
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 20px;
+      padding: 30px 34px;
+      font-family: Consolas, Menlo, monospace;
+      font-size: 18px;
+      line-height: 1.44;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+    }
+
+    .json-box strong {
+      color: #f8d45c;
+    }
+
+    .rule-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 30px 34px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .rule-box h3 {
+      font-size: 30px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 20px;
+    }
+
+    .rule-box li {
+      font-size: 22px;
+      line-height: 1.42;
+      color: var(--muted);
+      margin-bottom: 13px;
+    }
+
+    /* Architecture diagram slide */
+    .arch-layout {
+      position: absolute;
+      left: 86px;
+      top: 230px;
+      width: 1428px;
+      height: 575px;
+      display: grid;
+      grid-template-columns: 1fr 430px;
+      gap: 34px;
+    }
+
+    .architecture-diagram {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+      padding: 26px 38px;
+    }
+
+    .layer-block {
+      position: absolute;
+      left: 62px;
+      width: 680px;
+      border-radius: 18px;
+      border: 2px solid rgba(23, 35, 58, 0.12);
+      padding: 22px 24px;
+      text-align: center;
+    }
+
+    .frontend-layer {
+      top: 34px;
+      height: 132px;
+      background: #fff1c7;
+    }
+
+    .backend-layer {
+      top: 213px;
+      height: 132px;
+      background: #dbeafe;
+    }
+
+    .ai-layer {
+      top: 392px;
+      height: 132px;
+      background: #dcfce7;
+    }
+
+    .layer-title {
+      font-size: 26px;
+      line-height: 1;
+      color: var(--navy);
+      font-weight: 950;
+      margin-bottom: 22px;
+    }
+
+    .module-row {
+      display: flex;
+      justify-content: center;
+      gap: 26px;
+    }
+
+    .module {
+      width: 170px;
+      height: 58px;
+      border-radius: 10px;
+      background: #eadcf2;
+      border: 2px solid rgba(23, 35, 58, 0.12);
+      color: #263238;
+      font-size: 17px;
+      line-height: 1.14;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .down-arrow {
+      position: absolute;
+      left: 390px;
+      font-size: 34px;
+      line-height: 1;
+      color: var(--navy);
+      font-weight: 950;
+    }
+
+    .arrow-label {
+      position: absolute;
+      left: 425px;
+      font-size: 17px;
+      color: #475467;
+      font-weight: 800;
+    }
+
+    .arrow-1 {
+      top: 169px;
+    }
+
+    .label-1 {
+      top: 178px;
+    }
+
+    .arrow-2 {
+      top: 348px;
+    }
+
+    .label-2 {
+      top: 357px;
+    }
+
+    .db-area {
+      position: absolute;
+      left: 62px;
+      bottom: 24px;
+      width: 680px;
+      height: 20px;
+    }
+
+    .db {
+      position: absolute;
+      bottom: 0;
+      width: 170px;
+      height: 78px;
+      border-radius: 50% / 18%;
+      background: #fed7aa;
+      border: 2px solid #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #17233a;
+      font-weight: 850;
+    }
+
+    .db.mysql {
+      left: 60px;
+      bottom: -6px;
+    }
+
+    .db.neo4j {
+      right: 60px;
+      bottom: -6px;
+    }
+
+    .db-line {
+      position: absolute;
+      left: 402px;
+      top: 524px;
+      width: 2px;
+      height: 34px;
+      background: #475467;
+    }
+
+    .db-branch {
+      position: absolute;
+      left: 150px;
+      top: 556px;
+      width: 505px;
+      height: 2px;
+      background: #475467;
+    }
+
+    .db-down-left,
+    .db-down-right {
+      position: absolute;
+      top: 556px;
+      width: 2px;
+      height: 36px;
+      background: #475467;
+    }
+
+    .db-down-left {
+      left: 150px;
+    }
+
+    .db-down-right {
+      left: 655px;
+    }
+
+    .arch-notes {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .arch-note {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 7px solid var(--gold);
+      border-radius: 0 18px 18px 0;
+      padding: 24px 26px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .arch-note h3 {
+      font-size: 25px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .arch-note p {
+      font-size: 20px;
+      line-height: 1.38;
+      color: var(--muted);
+    }
+
+    /* Workflow */
+    .workflow-table-wrap {
+      position: absolute;
+      left: 86px;
+      top: 230px;
+      width: 1428px;
+      height: 570px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.06);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      height: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th {
+      background: var(--navy);
+      color: #fff;
+      text-align: left;
+      padding: 18px 20px;
+      font-size: 20px;
+      line-height: 1.25;
+      font-weight: 850;
+    }
+
+    td {
+      padding: 17px 20px;
+      border-bottom: 1px solid var(--line);
+      color: #475467;
+      vertical-align: middle;
+      font-size: 20px;
+      line-height: 1.34;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .step-cell {
+      color: var(--gold);
+      font-size: 27px;
+      line-height: 1;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .name-cell {
+      color: var(--navy);
+      font-weight: 900;
+    }
+
+    .mandatory {
+      color: var(--danger);
+      font-weight: 950;
+    }
+
+    .flow-strip {
+      position: absolute;
+      left: 86px;
+      bottom: 66px;
+      width: 1428px;
+      height: 92px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .flow-chip {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--gold);
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .flow-chip strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.16;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .flow-chip span {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    /* Risk Matrix */
+    .risk-table-wrap {
+      position: absolute;
+      left: 86px;
+      top: 230px;
+      width: 1428px;
+      height: 570px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.06);
+      background: #fff;
+    }
+
+    .risk-table-wrap th {
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .risk-table-wrap td {
+      font-size: 18px;
+      line-height: 1.38;
+      vertical-align: middle;
+    }
+
+    .risk-category {
+      color: var(--navy);
+      font-weight: 950;
+      font-size: 19px;
+    }
+
+    .impact-high {
+      color: var(--danger);
+      font-weight: 950;
+    }
+
+    .impact-med {
+      color: var(--warning);
+      font-weight: 950;
+    }
+
+    .probability {
+      color: var(--navy);
+      font-weight: 850;
+    }
+
+    .control-list {
+      color: #475467;
+      font-size: 18px;
+      line-height: 1.42;
+    }
+
+    .control-num {
+      display: inline-flex;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      background: #fff7df;
+      color: #8a6200;
+      font-weight: 950;
+      margin-right: 6px;
+      font-size: 15px;
+    }
+
+    /* =========================================================
+       Compact overrides for the last three appendix pages
+       Slides 18, 19, 20
+       ========================================================= */
+
+    .compact-slide h2 {
+      top: 90px;
+      font-size: 44px;
+      line-height: 1.08;
+    }
+
+    .compact-slide .slide-desc {
+      top: 150px;
+      font-size: 21px;
+      line-height: 1.34;
+      width: 1300px;
+    }
+
+    /* Slide 18 compact */
+    .slide-18 .prompt-wide {
+      top: 220px;
+      height: 470px;
+      grid-template-columns: 470px 1fr;
+      gap: 24px;
+    }
+
+    .slide-18 .rule-box {
+      padding: 24px 28px;
+    }
+
+    .slide-18 .rule-box h3 {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+
+    .slide-18 .rule-box li {
+      font-size: 19px;
+      line-height: 1.34;
+      margin-bottom: 9px;
+    }
+
+    .slide-18 .pill-list {
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .slide-18 .pill {
+      font-size: 15px;
+      padding: 7px 11px;
+    }
+
+    .slide-18 .json-box {
+      padding: 24px 30px;
+      font-size: 16.5px;
+      line-height: 1.36;
+    }
+
+    .compact-rule-strip {
+      position: absolute;
+      left: 86px;
+      bottom: 78px;
+      width: 1428px;
+      min-height: 86px;
+      background: #fff;
+      border-left: 7px solid var(--gold);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+      padding: 18px 26px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 18px;
+    }
+
+    .compact-rule {
+      border-right: 1px solid var(--line);
+      padding-right: 16px;
+    }
+
+    .compact-rule:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .compact-rule strong {
+      display: block;
+      color: var(--navy);
+      font-size: 18px;
+      line-height: 1.18;
+      font-weight: 950;
+      margin-bottom: 6px;
+    }
+
+    .compact-rule span {
+      display: block;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.28;
+      font-weight: 550;
+    }
+
+    /* Slide 19 compact */
+    .slide-19 .arch-layout {
+      top: 214px;
+      height: 565px;
+      grid-template-columns: 980px 414px;
+      gap: 34px;
+    }
+
+    .slide-19 .architecture-diagram {
+      padding: 20px 30px;
+    }
+
+    .slide-19 .layer-block {
+      left: 70px;
+      width: 760px;
+      height: 108px;
+      padding: 16px 20px;
+      border-radius: 16px;
+    }
+
+    .slide-19 .frontend-layer {
+      top: 26px;
+    }
+
+    .slide-19 .backend-layer {
+      top: 174px;
+    }
+
+    .slide-19 .ai-layer {
+      top: 322px;
+    }
+
+    .slide-19 .layer-title {
+      font-size: 23px;
+      margin-bottom: 15px;
+    }
+
+    .slide-19 .module-row {
+      gap: 20px;
+    }
+
+    .slide-19 .module {
+      width: 164px;
+      height: 48px;
+      font-size: 15px;
+      line-height: 1.12;
+      padding: 6px;
+    }
+
+    .slide-19 .down-arrow {
+      left: 448px;
+      font-size: 28px;
+    }
+
+    .slide-19 .arrow-label {
+      left: 482px;
+      font-size: 15px;
+    }
+
+    .slide-19 .arrow-1 {
+      top: 136px;
+    }
+
+    .slide-19 .label-1 {
+      top: 143px;
+    }
+
+    .slide-19 .arrow-2 {
+      top: 284px;
+    }
+
+    .slide-19 .label-2 {
+      top: 291px;
+    }
+
+    .slide-19 .db-line {
+      left: 458px;
+      top: 430px;
+      height: 32px;
+    }
+
+    .slide-19 .db-branch {
+      left: 190px;
+      top: 462px;
+      width: 536px;
+    }
+
+    .slide-19 .db-down-left,
+    .slide-19 .db-down-right {
+      top: 462px;
+      height: 30px;
+    }
+
+    .slide-19 .db-down-left {
+      left: 190px;
+    }
+
+    .slide-19 .db-down-right {
+      left: 726px;
+    }
+
+    .slide-19 .db {
+      width: 154px;
+      height: 64px;
+      font-size: 21px;
+      bottom: 16px;
+    }
+
+    .slide-19 .db.mysql {
+      left: 112px;
+    }
+
+    .slide-19 .db.neo4j {
+      right: 94px;
+    }
+
+    .slide-19 .arch-notes {
+      gap: 14px;
+    }
+
+    .slide-19 .arch-note {
+      padding: 20px 22px;
+      border-left-width: 6px;
+    }
+
+    .slide-19 .arch-note h3 {
+      font-size: 23px;
+      margin-bottom: 8px;
+    }
+
+    .slide-19 .arch-note p {
+      font-size: 18px;
+      line-height: 1.32;
+    }
+
+    /* Slide 20 compact */
+    .slide-20 .risk-table-wrap {
+      top: 214px;
+      height: 500px;
+      border-radius: 18px;
+    }
+
+    .slide-20 .risk-table-wrap th {
+      padding: 12px 14px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .slide-20 .risk-table-wrap td {
+      padding: 11px 14px;
+      font-size: 15.5px;
+      line-height: 1.26;
+    }
+
+    .slide-20 .risk-category {
+      font-size: 16px;
+      line-height: 1.22;
+    }
+
+    .slide-20 .control-list {
+      font-size: 15.5px;
+      line-height: 1.3;
+    }
+
+    .slide-20 .control-num {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      margin-right: 4px;
+    }
+
+    .slide-20 .flow-strip {
+      bottom: 82px;
+      height: 70px;
+      gap: 8px;
+    }
+
+    .slide-20 .flow-chip {
+      border-top-width: 5px;
+      border-radius: 12px;
+      padding: 10px 8px;
+    }
+
+    .slide-20 .flow-chip strong {
+      font-size: 14.5px;
+      line-height: 1.12;
+      margin-bottom: 4px;
+    }
+
+    .slide-20 .flow-chip span {
+      font-size: 12.5px;
+      line-height: 1.15;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        background: #fff;
+      }
+
+      .deck {
+        gap: 0;
+      }
+
+      .slide-frame {
+        width: 100vw;
+        height: 100vh !important;
+        page-break-after: always;
+      }
+
+      .slide {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- Slide 15 -->
+  <section class="slide-frame">
+    <div class="slide dark">
+      <div class="topbar"></div>
+      <div class="section-label">Appendix</div>
+
+      <div class="appendix-title">
+        <h1>Appendix:<br>Prompt, Architecture,<br>Workflow &amp; Controls</h1>
+        <p>
+          Supporting materials for the AML investigation copilot:
+          extraction prompts, RAG-enhanced design, system architecture,
+          end-to-end workflow, and risk controls.
+        </p>
+      </div>
+
+      <div class="appendix-card">
+        <h3>Appendix Contents</h3>
+        <ul>
+          <li>Prompt examples for entity and relation extraction</li>
+          <li>RAG-enhanced comprehensive extraction schema</li>
+          <li>GenAI + RAG + Knowledge Graph architecture</li>
+          <li>End-to-end AML investigation workflow</li>
+          <li>Core risk-control matrix</li>
+        </ul>
+      </div>
+
+      <div class="appendix-meta">Supplementary Slides | Based on Project Appendix</div>
+      <div class="slide-number">15 / 20</div>
+    </div>
+  </section>
+
+  <!-- Slide 16 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">Appendix A | Prompt Examples</div>
+      <h2>Prompt 1: Extract from transaction data</h2>
+      <p class="slide-desc">
+        This prompt converts raw transaction records into AML entities and graph-ready relations.
+      </p>
+
+      <div class="prompt-grid-2">
+        <div class="prompt-card">
+          <h3>Input &amp; Objective</h3>
+          <div class="mini-code">
+            prompt_extract_from_transaction = f"""<br>
+            Please extract anti-money laundering related entities and relations from the following financial Transaction Data:<br>
+            {transaction_text}<br>
+            """
+          </div>
+
+          <div style="height: 24px;"></div>
+
+          <div class="schema-row">
+            <div class="schema-label">Entities</div>
+            <div class="schema-text">
+              Customer, Account, Merchant, Transaction, RiskType, Amount
+            </div>
+          </div>
+
+          <div class="schema-row">
+            <div class="schema-label">Relations</div>
+            <div class="schema-text">
+              Belongs_To, Initiates, Receives, Transfers_To, Related_To_Merchant, Triggers_Risk
+            </div>
+          </div>
+
+          <div class="schema-row">
+            <div class="schema-label">Required Fields</div>
+            <div class="schema-text">
+              Each entity includes <code>id</code>, <code>text</code>, <code>type</code>.
+              Each relation includes <code>source</code>, <code>target</code>, <code>type</code>, <code>properties</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="prompt-card light-code">
+          <h3>Suspicious Transaction Rules</h3>
+          <ul>
+            <li>
+              Amount near RMB 50,000, specifically RMB 48,000–49,999, with structuring pattern
+              → <code>RiskType = Structuring</code>.
+            </li>
+            <li>
+              Late-night transaction between 23:00–05:00 with high frequency
+              → <code>RiskType = Late-night abnormal</code>.
+            </li>
+            <li>
+              Same account receives and sends funds within 24 hours
+              → <code>RiskType = Layering</code>.
+            </li>
+          </ul>
+
+          <div class="pill-list">
+            <span class="pill">Account → Customer</span>
+            <span class="pill">Customer → Transaction</span>
+            <span class="pill">Transaction → Customer</span>
+            <span class="pill">Account → Account</span>
+            <span class="pill">Customer → Merchant</span>
+            <span class="pill">Transaction → RiskType</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-number">16 / 20</div>
+    </div>
+  </section>
+
+  <!-- Slide 17 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Appendix A | Prompt Examples</div>
+      <h2>Prompts 2–3: Extract from alerts and case notes</h2>
+      <p class="slide-desc">
+        These prompts extend extraction from transaction-level facts to alert-level reasoning and historical case documentation.
+      </p>
+
+      <div class="prompt-grid-2">
+        <div class="prompt-card accent light-code">
+          <span class="tag">Prompt 2</span>
+          <h3>Extract from AML alert text</h3>
+          <p>
+            The alert extraction prompt identifies customers, accounts, suspicious transactions,
+            risk categories, regulations, related cases, and reporting thresholds.
+          </p>
+
+          <div class="schema-row">
+            <div class="schema-label">Entities</div>
+            <div class="schema-text">
+              Customer, Account, Transaction, RiskType, Regulation, Case, Threshold, Alert
+            </div>
+          </div>
+
+          <div class="schema-row">
+            <div class="schema-label">Relations</div>
+            <div class="schema-text">
+              Triggers_Alert, Violates_Regulation, Related_To_Case, Reaches_Threshold,
+              Recommend_SAR, Requires_Freeze
+            </div>
+          </div>
+
+          <div class="schema-row">
+            <div class="schema-label">Special Rules</div>
+            <div class="schema-text">
+              Single transaction ≥ RMB 50,000 triggers large transaction reporting.
+              Multiple transactions near RMB 50,000 within 24 hours indicate structuring risk.
+              Funds consolidated from multiple accounts and transferred out indicate layering.
+            </div>
+          </div>
+        </div>
+
+        <div class="prompt-card accent light-code">
+          <span class="tag">Prompt 3</span>
+          <h3>Extract from investigation case notes</h3>
+          <p>
+            The case-note prompt captures investigation structure, responsible parties,
+            conclusions, regulator reporting, and links to past cases.
+          </p>
+
+          <div class="schema-row">
+            <div class="schema-label">Entities</div>
+            <div class="schema-text">
+              Case, SuspectedCustomer, SuspectedAccount, GangMember, Conclusion,
+              Regulator, Investigator
+            </div>
+          </div>
+
+          <div class="schema-row">
+            <div class="schema-label">Relations</div>
+            <div class="schema-text">
+              Involved_In, Gang_Related, Has_Conclusion, Reported_To,
+              Cited_Regulation, Links_To_Past_Case
+            </div>
+          </div>
+
+          <div class="schema-row">
+            <div class="schema-label">Metadata</div>
+            <div class="schema-text">
+              Conclusion type, risk level, case status, timestamp, evidence,
+              and relation properties are required for auditability.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-number">17 / 20</div>
+    </div>
+  </section>
+
+  <!-- Slide 18 -->
+  <section class="slide-frame">
+    <div class="slide light compact-slide slide-18">
+      <div class="topbar"></div>
+      <div class="section-label">Appendix A | RAG-Enhanced Prompt</div>
+      <h2>Prompt 4: RAG-enhanced comprehensive extraction</h2>
+      <p class="slide-desc">
+        Combines retrieved compliance knowledge with input text to generate valid JSON entities, relations, and a risk summary.
+      </p>
+
+      <div class="prompt-wide">
+        <div class="rule-box">
+          <h3>Prompt Logic</h3>
+          <ul>
+            <li>Role: AI anti-money laundering assistant for financial institutions.</li>
+            <li>Input 1: Retrieved compliance knowledge from RAG context.</li>
+            <li>Input 2: Text to analyze.</li>
+            <li>Output: AML entities, financial relations, and one-sentence risk summary.</li>
+            <li>Strict constraint: output must be valid JSON.</li>
+          </ul>
+
+          <div class="pill-list">
+            <span class="pill">RAG Context</span>
+            <span class="pill">Input Text</span>
+            <span class="pill">Entities</span>
+            <span class="pill">Relations</span>
+            <span class="pill">Summary</span>
+          </div>
+        </div>
+
+        <div class="json-box">
+          <strong>Entity Types: 8 AML Financial Entities</strong><br><br>
+          1. Customer — name, ID, phone number<br>
+          2. Account — account number, type, balance<br>
+          3. Transaction — amount, timestamp, channel<br>
+          4. Merchant — merchant name, industry<br>
+          5. Branch — branch name, city<br>
+          6. Regulation — code, title, threshold<br>
+          7. RiskType — money laundering, fraud, terrorist financing<br>
+          8. Case — case number, status, conclusion<br><br>
+
+          <strong>Relation Types: 8 Financial Relations</strong><br><br>
+          Belongs_To: Account → Customer<br>
+          Transfers_To: Account → Account, with amount and timestamp<br>
+          Triggers_Risk: Transaction → RiskType<br>
+          Involved_In: Customer → Case<br>
+          Cited_Regulation: Case → Regulation<br>
+          Gang_Related: Customer → Customer<br>
+          Related_To_Merchant: Customer → Merchant<br>
+          Requires_Freeze: Alert → Account<br><br>
+
+          <strong>Output:</strong> entities, relations, summary
+        </div>
+      </div>
+
+      <div class="compact-rule-strip">
+        <div class="compact-rule">
+          <strong>Use RAG Knowledge</strong>
+          <span>Judgment must incorporate retrieved compliance context.</span>
+        </div>
+        <div class="compact-rule">
+          <strong>Threshold Rule</strong>
+          <span>Transaction amount ≥ RMB 50,000 marks large reporting threshold.</span>
+        </div>
+        <div class="compact-rule">
+          <strong>Structuring Rule</strong>
+          <span>Multiple transactions within 24 hours near RMB 50,000 indicate structuring.</span>
+        </div>
+        <div class="compact-rule">
+          <strong>JSON Constraint</strong>
+          <span>No relation below 0.6 confidence; output strictly valid JSON.</span>
+        </div>
+      </div>
+
+      <div class="slide-number">18 / 20</div>
+    </div>
+  </section>
+
+  <!-- Slide 19 -->
+  <section class="slide-frame">
+    <div class="slide white compact-slide slide-19">
+      <div class="topbar"></div>
+      <div class="section-label">Appendix B | System Architecture</div>
+      <h2>System architecture: GenAI + RAG + Knowledge Graph</h2>
+      <p class="slide-desc">
+        Separates frontend interaction, backend orchestration, AI core services, and persistent data stores.
+      </p>
+
+      <div class="arch-layout">
+        <div class="architecture-diagram">
+          <div class="layer-block frontend-layer">
+            <div class="layer-title">Frontend Layer</div>
+            <div class="module-row">
+              <div class="module">Alert<br>Dashboard</div>
+              <div class="module">Knowledge Graph<br>Visualization</div>
+            </div>
+          </div>
+
+          <div class="down-arrow arrow-1">↓</div>
+          <div class="arrow-label label-1">REST API</div>
+
+          <div class="layer-block backend-layer">
+            <div class="layer-title">Backend Layer</div>
+            <div class="module-row">
+              <div class="module">Permission<br>Verification</div>
+              <div class="module">Task<br>Dispatcher</div>
+              <div class="module">Data / Graph<br>Service</div>
+            </div>
+          </div>
+
+          <div class="down-arrow arrow-2">↓</div>
+          <div class="arrow-label label-2">system call</div>
+
+          <div class="layer-block ai-layer">
+            <div class="layer-title">AI Core Layer</div>
+            <div class="module-row">
+              <div class="module">Alert Text<br>Extraction</div>
+              <div class="module">RAG<br>Retrieval</div>
+              <div class="module">Entity / Relation<br>Extraction</div>
+            </div>
+          </div>
+
+          <div class="db-line"></div>
+          <div class="db-branch"></div>
+          <div class="db-down-left"></div>
+          <div class="db-down-right"></div>
+
+          <div class="db mysql">MySQL</div>
+          <div class="db neo4j">Neo4j</div>
+        </div>
+
+        <div class="arch-notes">
+          <div class="arch-note">
+            <h3>Frontend Layer</h3>
+            <p>
+              Provides alert dashboard and knowledge graph visualization for analysts.
+            </p>
+          </div>
+
+          <div class="arch-note">
+            <h3>Backend Layer</h3>
+            <p>
+              Handles permission verification, task dispatching, and data / graph services through REST API calls.
+            </p>
+          </div>
+
+          <div class="arch-note">
+            <h3>AI Core &amp; Data Stores</h3>
+            <p>
+              Performs alert text extraction, RAG retrieval, and entity-relation extraction.
+              MySQL stores raw data; Neo4j stores the financial risk graph.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-number">19 / 20</div>
+    </div>
+  </section>
+
+  <!-- Slide 20 -->
+  <section class="slide-frame">
+    <div class="slide light compact-slide slide-20">
+      <div class="topbar"></div>
+      <div class="section-label">Appendix C–D | Workflow &amp; Risk Controls</div>
+      <h2>End-to-end workflow and core risk-control matrix</h2>
+      <p class="slide-desc">
+        Human review remains mandatory; controls address hallucination, injection, leakage, governance, and third-party model risk.
+      </p>
+
+      <div class="risk-table-wrap">
+        <table>
+          <tbody><tr>
+            <th style="width: 18%;">Risk Category</th>
+            <th style="width: 31%;">Risk Description</th>
+            <th style="width: 11%;">Impact</th>
+            <th style="width: 12%;">Probability</th>
+            <th style="width: 28%;">Control Measures</th>
+          </tr>
+
+          <tr>
+            <td class="risk-category">Model<br>Hallucination</td>
+            <td>Generating false transaction associations, incorrect compliance conclusions, fabricated cases.</td>
+            <td class="impact-high">High</td>
+            <td class="probability">Medium</td>
+            <td class="control-list">
+              <span class="control-num">1</span>RAG bound to internal factual data<br>
+              <span class="control-num">2</span>No inference without evidence
+            </td>
+          </tr>
+
+          <tr>
+            <td class="risk-category">Prompt<br>Injection</td>
+            <td>Malicious input bypassing compliance, inducing violate content generation.</td>
+            <td class="impact-high">High</td>
+            <td class="probability">Low</td>
+            <td class="control-list">
+              <span class="control-num">1</span>Prompt whitelist filtering<br>
+              <span class="control-num">2</span>Input length / sensitive word interception
+            </td>
+          </tr>
+
+          <tr>
+            <td class="risk-category">Customer Data<br>Leakage</td>
+            <td>Transaction, account, or identity information exposure.</td>
+            <td class="impact-high">Very High</td>
+            <td class="probability">Medium</td>
+            <td class="control-list">
+              <span class="control-num">1</span>Data masking<br>
+              <span class="control-num">2</span>Intranet isolation, no external transmission
+            </td>
+          </tr>
+
+          <tr>
+            <td class="risk-category">Governance<br>Deficiency</td>
+            <td>No approval, no audit, no version management.</td>
+            <td class="impact-high">High</td>
+            <td class="probability">Medium</td>
+            <td class="control-list">
+              <span class="control-num">1</span>Board-level AI approval process<br>
+              <span class="control-num">2</span>Full operation log traceability
+            </td>
+          </tr>
+
+          <tr>
+            <td class="risk-category">Third-party<br>Model Risk</td>
+            <td>External API instability or non-compliance.</td>
+            <td class="impact-med">Medium</td>
+            <td class="probability">Low</td>
+            <td class="control-list">
+              <span class="control-num">1</span>Use specialized financial LLMs<br>
+              <span class="control-num">2</span>Local deployment for critical inference
+            </td>
+          </tr>
+        </tbody></table>
+      </div>
+
+      <div class="flow-strip">
+        <div class="flow-chip">
+          <strong>1 Alert Intake</strong>
+          <span>Suspicious alerts pushed</span>
+        </div>
+        <div class="flow-chip">
+          <strong>2 AI Preprocess</strong>
+          <span>Extract key facts</span>
+        </div>
+        <div class="flow-chip">
+          <strong>3 RAG Retrieval</strong>
+          <span>Rules &amp; cases</span>
+        </div>
+        <div class="flow-chip">
+          <strong>4 KG Association</strong>
+          <span>Customer-account-risk</span>
+        </div>
+        <div class="flow-chip">
+          <strong>5 Generation</strong>
+          <span>Summary &amp; notes</span>
+        </div>
+        <div class="flow-chip">
+          <strong>6 Human Review</strong>
+          <span>Mandatory</span>
+        </div>
+        <div class="flow-chip">
+          <strong>7 Archive</strong>
+          <span>Approve or regenerate</span>
+        </div>
+      </div>
+
+      <div class="slide-number">20 / 20</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  /*
+    PowerPoint-like scaling engine.
+
+    Every slide remains a fixed 1600 x 900 virtual canvas.
+    The browser only scales the entire canvas.
+  */
+  (function () {
+    const SLIDE_W = 1600;
+    const SLIDE_H = 900;
+
+    function scaleSlides() {
+      const frames = document.querySelectorAll(".slide-frame");
+      const availableW = Math.max(320, window.innerWidth);
+      const availableH = Math.max(360, window.innerHeight);
+
+      const viewportPaddingX = 32;
+      const viewportPaddingY = 48;
+
+      const scale = Math.min(
+        (availableW - viewportPaddingX) / SLIDE_W,
+        (availableH - viewportPaddingY) / SLIDE_H,
+        1
+      );
+
+      const scaledH = SLIDE_H * scale;
+
+      frames.forEach((frame) => {
+        frame.style.height = scaledH + "px";
+
+        const slide = frame.querySelector(".slide");
+        slide.style.transform = "scale(" + scale + ")";
+      });
+    }
+
+    window.addEventListener("resize", scaleSlides);
+    window.addEventListener("orientationchange", scaleSlides);
+    window.addEventListener("load", scaleSlides);
+    scaleSlides();
+  })();
+</script>
+
+
+
+</body></html>

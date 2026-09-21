@@ -1,0 +1,15 @@
+
+--- Test 1: Bob ---
+[VisionPro-v2] Analyzing cat.png...
+[Billing] Deducted 15.0 quota from the user. Remaining quota: 10.00
+Result: It's a cat (processed cat.png)
+
+--- Test 2: Bob (Trigger Limit) ---
+Caught expected error!
+
+--- Test 3: Alice (Admin Action) ---
+Trained a model to classify birds!
+Caught expected error!
+
+--- Test 4: Bob (Quota Check) ---
+Caught expected error!

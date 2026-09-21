@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>NLP Final - Intelligent Search Engine (Web Interface)</title>
+
+<style>
+    body {
+        font-family: "Arial", sans-serif;
+        margin: 0 auto;
+        padding: 40px;
+        max-width: 800px;
+        background-color: #f5f7fa;
+    }
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+        color: #2d3748;
+        margin-bottom: 25px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #4a5568;
+        font-weight: 500;
+    }
+    #question {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        box-sizing: border-box;
+        resize: vertical;
+        min-height: 100px;
+    }
+    #file-upload {
+        display: none;
+    }
+    .upload-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4299e1;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+    .upload-btn:hover {
+        background-color: #3182ce;
+    }
+    .upload-info {
+        color: #718096;
+        font-size: 14px;
+        display: inline-block;
+        line-height: 38px;
+    }
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background-color: #22c55e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .submit-btn:hover {
+        background-color: #16a34a;
+    }
+    .result-section {
+        margin-top: 30px;
+        padding: 20px;
+        border-radius: 6px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    .result-title {
+        font-size: 18px;
+        color: #2d3748;
+        font-weight: 600;
+    }
+    .confidence {
+        color: #4299e1;
+        font-size: 14px;
+        background-color: #e0f2fe;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    #answer {
+        white-space: pre-wrap;
+        color: #1a202c;
+        line-height: 1.8;
+        font-size: 16px;
+        min-height: 120px;
+    }
+    .loading {
+        text-align: center;
+        color: #718096;
+        padding: 30px;
+    }
+    .error {
+        color: #dc2626;
+        background-color: #fee2e2;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 15px;
+        white-space: pre-wrap;
+    }
+    .debug-info {
+        display: none !important; /* Force hide debug info */
+    }
+    #preview-container {
+        margin-top: 15px;
+        display: none;
+    }
+    #preview-img {
+        max-width: 200px;
+        max-height: 200px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 5px;
+    }
+    .batch-option {
+        margin: 15px 0;
+        padding: 10px;
+        background-color: #f0f8fb;
+        border-radius: 6px;
+    }
+    #download-json {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background-color: #9f7aea;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: none;
+    }
+    #download-json:hover {
+        background-color: #805ad5;
+    }
+    .batch-hint {
+        font-size: 13px;
+        color: #718096;
+        margin-top: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="container">
+    <h2>Intelligent Search Engine - Web Interface</h2>
+
+    <!-- Question Input Section -->
+    <div class="form-group">
+        <label for="question">Enter your question (optional for batch document processing):</label>
+        <textarea id="question" placeholder="e.g., What's the weather in Hong Kong today? / How to get from HKUST to Central?"></textarea>
+    </div>
+
+    <!-- File Upload Section (Supports multimodal files) -->
+    <div class="form-group">
+        <label>Upload File (Supports images, Word, PDF, TXT, MD):</label>
+        <button type="button" class="upload-btn" onclick="document.getElementById('file-upload').click();">
+            Select File
+        </button>
+        <span class="upload-info" id="upload-status">No file selected</span>
+        <input type="file" id="file-upload" accept="image/*,.docx,.pdf,.txt,.md" onchange="handleFileUpload(event)">
+
+        <!-- Image Preview Section (Only for images) -->
+        <div id="preview-container">
+            <p>Image Preview:</p>
+            <img id="preview-img" src="" alt="Image Preview">
+        </div>
+    </div>
+
+    <!-- Batch Processing Option -->
+    <div class="batch-option">
+        <input type="checkbox" id="batch-mode" />
+        <label for="batch-mode">Batch Process Document</label>
+        <p class="batch-hint">Answer all questions in the uploaded document and export results as JSON (supports Word/PDF/TXT/MD)</p>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="submit-btn" onclick="sendQuery()">Submit Request</button>
+
+    <!-- Result Display Section -->
+    <div class="result-section">
+        <div class="result-header">
+            <div class="result-title">Processing Result</div>
+            <div class="confidence" id="confidence">Confidence: --</div>
+        </div>
+        <div id="answer" class="loading">
+            Please upload a file or enter a question and click submit. The system will generate results for you...
+        </div>
+        <button id="download-json" onclick="downloadJSON()">Download JSON Result</button>
+        <div id="debug-info" class="debug-info"></div>
+    </div>
+</div>
+
+<script>
+// Global variable to store batch JSON result
+let batchResult = null;
+
+// File Upload Handling (Supports multimodal files, image preview only for images)
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    const uploadStatus = document.getElementById("upload-status");
+    const previewContainer = document.getElementById("preview-container");
+    const previewImg = document.getElementById("preview-img");
+
+    if (file) {
+        uploadStatus.textContent = `Selected: ${file.name}`;
+
+        // Show preview only for image files
+        const imageExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".tiff"];
+        const fileExt = os.path.splitext(file.name)[1].toLowerCase() || "";
+
+        if (imageExtensions.includes(fileExt)) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewContainer.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.style.display = "none"; // Hide preview for non-image files
+        }
+    } else {
+        uploadStatus.textContent = "No file selected";
+        previewContainer.style.display = "none";
+    }
+}
+
+// Helper function to get file extension (fix for browser environment)
+const os = {
+    path: {
+        splitext: function(filename) {
+            const lastDotIndex = filename.lastIndexOf(".");
+            if (lastDotIndex === -1) return ["", ""];
+            return [filename.slice(0, lastDotIndex), filename.slice(lastDotIndex)];
+        }
+    }
+};
+
+// Send Query to Backend
+async function sendQuery() {
+    const question = document.getElementById("question").value.trim();
+    const file = document.getElementById("file-upload").files[0];
+    const isBatchMode = document.getElementById("batch-mode").checked;
+    const answerBox = document.getElementById("answer");
+    const confidenceBox = document.getElementById("confidence");
+    const downloadBtn = document.getElementById("download-json");
+
+    // Reset status
+    answerBox.className = "loading";
+    answerBox.textContent = "Processing, please wait...";
+    confidenceBox.textContent = "Confidence: Loading...";
+    downloadBtn.style.display = "none";
+    batchResult = null;
+
+    // Input Validation
+    if (!file && !question) {
+        answerBox.innerHTML = "<div class='error'>Please enter a question or upload a file before submitting!</div>";
+        return;
+    }
+
+    if (isBatchMode && !file) {
+        answerBox.innerHTML = "<div class='error'>Please upload a document (Word/PDF/TXT/MD) for batch processing!</div>";
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        if (question) formData.append("question", question);
+        if (file) formData.append("file", file);
+
+        // Determine API endpoint
+        const endpoint = isBatchMode ? "http://localhost:8000/batch_query" : "http://localhost:8000/query";
+
+        const response = await fetch(endpoint, {
+            method: "POST",
+            body: formData,
+            mode: "cors",
+            credentials: "omit",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        console.log("Response Status:", response.status);
+        const responseText = await response.text();
+        console.log("Backend Raw Response:", responseText);
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error! Status: ${response.status}, Response: ${responseText.slice(0, 200)}`);
+        }
+
+        // Parse JSON Response
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonErr) {
+            throw new Error(`JSON Parsing Failed! Backend did not return valid JSON: ${responseText.slice(0, 200)}`);
+        }
+
+        // Handle Batch Mode Result
+        if (isBatchMode) {
+            batchResult = result;
+            answerBox.className = "";
+            confidenceBox.textContent = `Total Questions: ${result.stats.total_questions}`;
+
+            // Display batch statistics
+            let statsText = `Batch Processing Complete!\n`;
+            statsText += `Total Questions: ${result.stats.total_questions}\n`;
+            statsText += `Successful Answers: ${result.stats.success_count}\n`;
+            statsText += `Failure Answers: ${result.stats.failure_count}\n`;
+            statsText += `Total Processing Time: ${result.stats.total_time_seconds}s\n`;
+            statsText += `Average Time per Question: ${result.stats.avg_time_per_question_seconds}s\n`;
+            statsText += `Success Rate: ${result.stats.success_rate_percent}%\n\n`;
+            statsText += `First 3 Q&A Preview:\n`;
+
+            // Show first 3 Q&A as preview
+            const previewQuestions = result.questions.slice(0, 3);
+            previewQuestions.forEach((item, index) => {
+                statsText += `\nQ${item.question_id}: ${item.question}\n`;
+                statsText += `A: ${item.answer.substring(0, 100)}${item.answer.length > 100 ? "..." : ""}\n`;
+            });
+
+            answerBox.textContent = statsText;
+            downloadBtn.style.display = "inline-block";
+        }
+        // Handle Normal Mode Result
+        else {
+            if (result.success) {
+                answerBox.className = "";
+                answerBox.textContent = result.answer || "No valid answer retrieved";
+                confidenceBox.textContent = `Confidence: ${result.confidence.toFixed(2)}`;
+            } else {
+                answerBox.innerHTML = `<div class='error'>Query Failed: ${result.error || "Unknown error"}</div>`;
+                confidenceBox.textContent = "Confidence: --";
+            }
+        }
+
+    } catch (err) {
+        let errorMsg = `Request Failed: ${err.message}\n\n`;
+        errorMsg += "Troubleshooting Steps:\n";
+        errorMsg += "1. Ensure backend service is running (python server.py)\n";
+        errorMsg += "2. Ensure port 8000 is not occupied (modify port in server.py if needed)\n";
+        errorMsg += "3. Check backend console logs for errors\n";
+        errorMsg += "4. Check browser console (F12) for detailed error logs";
+        answerBox.innerHTML = `<div class='error'>${errorMsg}</div>`;
+        confidenceBox.textContent = "Confidence: --";
+        console.error("Detailed Error:", err);
+    }
+}
+
+// Download JSON Result
+function downloadJSON() {
+    if (!batchResult) return;
+
+    const jsonString = JSON.stringify(batchResult, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const timestamp = new Date().toISOString().replace(/[-:\.T]/g, "");
+    a.download = `batch_process_result_${timestamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Keyboard Shortcut: Ctrl+Enter to Submit
+document.getElementById("question").addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.key === "Enter") {
+        sendQuery();
+    }
+});
+</script>
+
+</body>
+</html>

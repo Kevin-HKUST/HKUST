@@ -1,0 +1,34 @@
+==== Task 1 ====
+The tropical day count for the first three cities are: [199 190 200]
+The freezing day count for the first three cities are: [194 188 225]
+The pleasant day count for the first three cities are: [587 582 584]
+The city with the most extreme weather is 22.
+==== Task 2 ====
+The heatwave count for the first three cities are: [1 0 2]
+The city with the longest heatwave is City 30, with a heatwave lasting 5 day(s).
+==== Task 3 ====
+The number of 7-day warm periods in the first three cities are: [191 184 203]
+The month with the largest increase in temperature for the first three cities are: [26  1 11]
+The month with the largest decrease in temperature for the first three cities are: [31 18  7]
+==== Task 4 ====
+The number of record-breaking high temperatures for the first three cities are: [ 8 10  8]
+The number of record-breaking low temperatures for the first three cities are: [ 6  9 12]
+The number of rapid temperature changes for the first three cities are: [908 853 876]
+The number of threshold crossings with threshold = 20°C for the first three cities are: [692 624 614]
+==== Task 5 ====
+The histogram for the first three cities are:
+[[ 58  62  67]
+ [100  99 118]
+ [160 153 177]
+ [233 234 215]
+ [256 310 256]
+ [255 263 245]
+ [249 231 251]
+ [197 169 169]
+ [109 104  96]
+ [ 59  62  59]
+ [ 21  13  32]]
+The most correlated pair of cities are City 25 and 28
+==== Task 6 ====
+The number of heat spikes in the first three cities are: [376 359 379]
+The number of cold snaps in the first three cities are: [27 27 38]

@@ -1,0 +1,44 @@
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+API-KEYS.txt
+*credentials*.json
+
+# --- Datasets (download separately, see each README) ---
+dataset/
+cifar-10-batches-py/
+cifar-10-python.tar.gz
+weatherAUS.csv
+*.tar.gz
+
+# --- Model weights and caches ---
+*.pth
+*.safetensors
+*.ckpt
+embedding_cache/
+vector_db/
+*.sqlite3
+*.index
+*.pkl
+
+# --- Runtime output ---
+logs/
+*.log
+evaluation_results/
+out*.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+*.egg-info/
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,1733 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GenAI for AML &amp; Financial Fraud Investigations</title>
+  <style>
+    :root {
+      --slide-w: 1600px;
+      --slide-h: 900px;
+
+      --navy: #17233a;
+      --navy2: #24324a;
+      --gold: #d7ad2f;
+      --gold2: #f2c94c;
+      --light: #f5f7fb;
+      --muted: #667085;
+      --text: #182230;
+      --line: #e4e7ec;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success: #059669;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      background: #111827;
+      font-family: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body {
+      padding: 32px 0 60px;
+    }
+
+    /*
+      Key design change:
+      Each .slide-frame is the responsive viewport holder.
+      Each .slide is a fixed 1600x900 virtual canvas.
+      JS scales .slide as a whole.
+    */
+    .deck {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+
+    .slide-frame {
+      position: relative;
+      width: 100%;
+      height: var(--frame-h, 900px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    .slide {
+      position: relative;
+      width: var(--slide-w);
+      height: var(--slide-h);
+      flex: 0 0 auto;
+      overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+      transform-origin: center center;
+      background: #fff;
+    }
+
+    .slide.white {
+      background: #fff;
+    }
+
+    .slide.light {
+      background: var(--light);
+    }
+
+    .slide.dark {
+      background: linear-gradient(135deg, #17233a 0%, #263852 100%);
+      color: #fff;
+    }
+
+    .topbar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(90deg, var(--gold), #f4d35e, var(--navy));
+    }
+
+    .section-label {
+      position: absolute;
+      left: 86px;
+      top: 58px;
+      font-size: 18px;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--gold);
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    h1,
+    h2,
+    h3,
+    p,
+    li,
+    td,
+    th {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    h1 {
+      font-size: 78px;
+      line-height: 1.05;
+      letter-spacing: -2.8px;
+      font-weight: 950;
+    }
+
+    h2 {
+      position: absolute;
+      left: 86px;
+      top: 96px;
+      width: 1240px;
+      font-size: 48px;
+      line-height: 1.12;
+      letter-spacing: -1.2px;
+      color: var(--navy);
+      font-weight: 950;
+    }
+
+    .dark h2 {
+      color: #fff;
+    }
+
+    .slide-desc {
+      position: absolute;
+      left: 86px;
+      top: 164px;
+      width: 1240px;
+      font-size: 23px;
+      line-height: 1.42;
+      color: var(--muted);
+      font-weight: 450;
+    }
+
+    .dark .slide-desc {
+      color: #cbd5e1;
+    }
+
+    .slide-number {
+      position: absolute;
+      right: 42px;
+      bottom: 28px;
+      font-size: 17px;
+      color: #98a2b3;
+      font-weight: 600;
+    }
+
+    .dark .slide-number {
+      color: #94a3b8;
+    }
+
+    .footer-note {
+      position: absolute;
+      left: 86px;
+      bottom: 28px;
+      width: 980px;
+      font-size: 18px;
+      line-height: 1.35;
+      color: #98a2b3;
+      font-weight: 500;
+    }
+
+    .gold {
+      color: var(--gold);
+    }
+
+    .card {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 28px 30px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+      overflow: hidden;
+    }
+
+    .card.accent {
+      border-top: 7px solid var(--gold);
+    }
+
+    .card h3 {
+      font-size: 29px;
+      line-height: 1.22;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    .card p {
+      font-size: 22px;
+      line-height: 1.45;
+      color: var(--muted);
+      font-weight: 450;
+    }
+
+    .card li {
+      font-size: 22px;
+      line-height: 1.45;
+      color: var(--muted);
+      margin-bottom: 11px;
+      padding-left: 2px;
+    }
+
+    ul,
+    ol {
+      padding-left: 28px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #fff7df;
+      color: #8a6200;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .big-statement {
+      position: absolute;
+      left: 86px;
+      bottom: 72px;
+      width: 1428px;
+      min-height: 86px;
+      background: #fff;
+      border-left: 8px solid var(--gold);
+      border-radius: 18px;
+      padding: 22px 30px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+    }
+
+    .big-statement p {
+      font-size: 25px;
+      line-height: 1.35;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    code {
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.88em;
+      font-family: Consolas, Menlo, monospace;
+    }
+
+    /* Slide 1 */
+    .title-main {
+      position: absolute;
+      left: 96px;
+      top: 190px;
+      width: 850px;
+    }
+
+    .subtitle {
+      margin-top: 28px;
+      width: 850px;
+      font-size: 33px;
+      line-height: 1.35;
+      color: #d0d8e4;
+      font-weight: 450;
+    }
+
+    .meta {
+      position: absolute;
+      left: 96px;
+      bottom: 86px;
+      font-size: 24px;
+      color: #94a3b8;
+      font-weight: 550;
+    }
+
+    .members {
+      position: absolute;
+      right: 96px;
+      bottom: 92px;
+      width: 380px;
+      padding: 26px 30px;
+      border-left: 6px solid var(--gold);
+      background: rgba(255, 255, 255, 0.065);
+      border-radius: 0 16px 16px 0;
+    }
+
+    .members strong {
+      display: block;
+      color: #fff;
+      font-size: 24px;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+
+    .members span {
+      display: block;
+      color: #cbd5e1;
+      font-size: 23px;
+      line-height: 1.5;
+    }
+
+    /* Slide 2 roadmap */
+    .agenda-grid {
+      position: absolute;
+      left: 86px;
+      top: 246px;
+      width: 1428px;
+      height: 540px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .agenda-card {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 30px 34px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+    }
+
+    .agenda-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 7px;
+      height: 100%;
+      background: var(--gold);
+    }
+
+    .agenda-num {
+      font-size: 46px;
+      color: var(--gold);
+      font-weight: 950;
+      line-height: 1;
+      margin-bottom: 18px;
+    }
+
+    .agenda-card h3 {
+      font-size: 27px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .agenda-card p {
+      font-size: 21px;
+      line-height: 1.38;
+      color: var(--muted);
+    }
+
+    /* Three cards */
+    .three-card-grid {
+      position: absolute;
+      left: 86px;
+      top: 250px;
+      width: 1428px;
+      height: 418px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+
+    .six-card-grid {
+      position: absolute;
+      left: 86px;
+      top: 246px;
+      width: 1428px;
+      height: 560px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .six-card-grid .card h3 {
+      font-size: 27px;
+      margin-bottom: 12px;
+    }
+
+    .six-card-grid .card p {
+      font-size: 21px;
+      line-height: 1.42;
+    }
+
+    /* Two-column cards */
+    .two-col-grid {
+      position: absolute;
+      left: 86px;
+      top: 246px;
+      width: 1428px;
+      height: 460px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .two-col-grid .card h3 {
+      font-size: 31px;
+      margin-bottom: 20px;
+    }
+
+    .two-col-grid .card li {
+      font-size: 24px;
+      line-height: 1.48;
+      margin-bottom: 13px;
+    }
+
+    /* Workflow */
+    .workflow-grid {
+      position: absolute;
+      left: 86px;
+      top: 246px;
+      width: 1428px;
+      height: 484px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .step {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 26px 28px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .step-num {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #fff;
+      font-weight: 950;
+      font-size: 21px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .step h3 {
+      font-size: 27px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .step p {
+      font-size: 21px;
+      line-height: 1.42;
+      color: var(--muted);
+    }
+
+    /* Architecture */
+    .diagram {
+      position: absolute;
+      left: 86px;
+      top: 248px;
+      width: 1428px;
+      height: 505px;
+      display: grid;
+      grid-template-columns: 1fr 70px 1fr 70px 1fr;
+      align-items: center;
+    }
+
+    .layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .layer {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 26px 28px;
+      min-height: 210px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .mini-title {
+      font-size: 15px;
+      line-height: 1;
+      font-weight: 950;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .layer h3 {
+      font-size: 27px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .layer p {
+      font-size: 20px;
+      line-height: 1.42;
+      color: var(--muted);
+    }
+
+    .arrow-col {
+      color: var(--gold);
+      font-size: 54px;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    /* Knowledge graph */
+    .kg-layout {
+      position: absolute;
+      left: 86px;
+      top: 244px;
+      width: 1428px;
+      height: 560px;
+      display: grid;
+      grid-template-columns: 540px 1fr;
+      gap: 30px;
+    }
+
+    .kg-info.card {
+      height: 100%;
+    }
+
+    .kg-info h3 {
+      font-size: 25px;
+      margin-bottom: 10px;
+    }
+
+    .kg-info li {
+      font-size: 20px;
+      line-height: 1.42;
+      margin-bottom: 7px;
+    }
+
+    .kg-info p {
+      font-size: 20px;
+      line-height: 1.42;
+    }
+
+    .kg-svg-wrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .kg-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Example */
+    .split-example {
+      position: absolute;
+      left: 86px;
+      top: 244px;
+      width: 1428px;
+      height: 560px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .code-card {
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 20px;
+      padding: 34px 38px;
+      font-family: Consolas, Menlo, monospace;
+      font-size: 20px;
+      line-height: 1.47;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+    }
+
+    .code-card strong {
+      color: #f8d45c;
+      font-size: 21px;
+    }
+
+    .output-card {
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      padding: 34px 38px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+    }
+
+    .output-card h3 {
+      font-size: 29px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .output-card li {
+      font-size: 21px;
+      line-height: 1.42;
+      color: var(--muted);
+      margin-bottom: 13px;
+    }
+
+    /* Prompt */
+    .example-box {
+      position: absolute;
+      left: 86px;
+      top: 242px;
+      width: 1428px;
+      height: 520px;
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 20px;
+      padding: 36px 42px;
+      font-family: Consolas, Menlo, monospace;
+      font-size: 22px;
+      line-height: 1.48;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.08);
+    }
+
+    .example-box strong {
+      color: #f8d45c;
+      font-size: 23px;
+    }
+
+    .additional-prompt {
+      position: absolute;
+      left: 86px;
+      bottom: 78px;
+      width: 1428px;
+      font-size: 22px;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    /* Table */
+    .table-wrap {
+      position: absolute;
+      left: 86px;
+      top: 240px;
+      width: 1428px;
+      height: 550px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.06);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      height: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th {
+      background: var(--navy);
+      color: #fff;
+      text-align: left;
+      padding: 18px 18px;
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    td {
+      padding: 17px 18px;
+      border-bottom: 1px solid var(--line);
+      color: #475467;
+      vertical-align: top;
+      font-size: 18px;
+      line-height: 1.32;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .risk-pill {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 950;
+      padding: 4px 9px;
+      border-radius: 999px;
+      color: #fff;
+      margin-right: 7px;
+      line-height: 1;
+    }
+
+    .high {
+      background: var(--danger);
+    }
+
+    .med {
+      background: var(--warning);
+    }
+
+    .low {
+      background: var(--success);
+    }
+
+    /* KPIs */
+    .kpi-grid {
+      position: absolute;
+      left: 86px;
+      top: 244px;
+      width: 1428px;
+      height: 530px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 26px;
+    }
+
+    .kpi {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 34px 34px;
+      box-shadow: 0 8px 22px rgba(16, 24, 40, 0.05);
+      overflow: hidden;
+    }
+
+    .kpi .value {
+      font-size: 56px;
+      line-height: 1;
+      font-weight: 950;
+      color: var(--gold);
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+
+    .kpi h3 {
+      font-size: 27px;
+      line-height: 1.2;
+      color: var(--navy);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .kpi p {
+      font-size: 21px;
+      line-height: 1.42;
+      color: var(--muted);
+    }
+
+    /* Conclusion */
+    .conclusion-grid {
+      position: absolute;
+      left: 86px;
+      top: 196px;
+      width: 1428px;
+      height: 590px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .conclusion-grid .card {
+      height: 100%;
+    }
+
+    .conclusion-grid .card h3 {
+      font-size: 31px;
+      margin-bottom: 22px;
+    }
+
+    .conclusion-grid .card li {
+      font-size: 22px;
+      line-height: 1.44;
+      margin-bottom: 14px;
+    }
+
+    .recommend {
+      height: 100%;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 20px;
+      padding: 36px 40px;
+      overflow: hidden;
+    }
+
+    .recommend h3 {
+      color: #fff;
+      font-size: 33px;
+      line-height: 1.2;
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .recommend > p {
+      color: #d0d5dd;
+      font-size: 22px;
+      line-height: 1.42;
+      margin-bottom: 20px;
+    }
+
+    .phase {
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-top: 18px;
+    }
+
+    .phase strong {
+      display: block;
+      color: var(--gold2);
+      font-size: 22px;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .phase p {
+      font-size: 19px;
+      line-height: 1.38;
+      color: #d0d5dd;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        background: #fff;
+      }
+
+      .deck {
+        gap: 0;
+      }
+
+      .slide-frame {
+        width: 100vw;
+        height: 100vh !important;
+        page-break-after: always;
+      }
+
+      .slide {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+  
+/* === OVERRIDES FOR OVERFLOW ISSUES === */
+
+/* Slide 5: Proposed GenAI Solution (.workflow-grid and .step) */
+.workflow-grid .step {
+    padding: 18px 22px !important;
+}
+.workflow-grid .step-num {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+}
+.workflow-grid .step h3 {
+    font-size: 24px !important;
+    margin-bottom: 6px !important;
+}
+.workflow-grid .step p {
+    font-size: 18px !important;
+    line-height: 1.3 !important;
+}
+
+/* Slide 8: Data Engineering / KG Layout (.kg-info) */
+.kg-info.card {
+    padding: 24px 30px !important;
+}
+.kg-info h3 {
+    font-size: 22px !important;
+    margin-bottom: 6px !important;
+}
+.kg-info h3[style] {
+    margin-top: 14px !important;
+}
+.kg-info li {
+    font-size: 18px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 4px !important;
+}
+.kg-info p {
+    font-size: 18px !important;
+    line-height: 1.3 !important;
+}
+
+/* Slide 9: Investigation Workflow / Concrete Example (.code-card) */
+.split-example .code-card {
+    padding: 24px 28px !important;
+    font-size: 17px !important;
+    line-height: 1.4 !important;
+}
+.split-example .code-card strong {
+    font-size: 18px !important;
+}
+
+/* Slide 14: Recommendation (Compromise compression) */
+.conclusion-grid .recommend {
+    padding: 28px 32px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.recommend h3 {
+    font-size: 28px !important;
+    margin-bottom: 8px !important;
+}
+.recommend > p {
+    font-size: 19px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.3 !important;
+}
+.recommend .phase {
+    padding: 16px 20px !important;
+    margin-top: 10px !important;
+}
+.recommend .phase strong {
+    font-size: 20px !important;
+    margin-bottom: 4px !important;
+}
+.recommend .phase p {
+    font-size: 17px !important;
+    line-height: 1.35 !important;
+}
+
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- Slide 1 -->
+  <section class="slide-frame">
+    <div class="slide dark">
+      <div class="topbar"></div>
+      <div class="section-label">MAIE6000B GenAI in Finance | Mini Project</div>
+
+      <div class="title-main">
+        <h1>GenAI for AML &amp;<br>Financial Fraud<br>Investigations</h1>
+        <p class="subtitle">
+          A controlled investigation copilot using <span class="gold">RAG</span>
+          and <span class="gold">Knowledge Graphs</span> to support AML analysts
+          in Hong Kong banking.
+        </p>
+      </div>
+
+      <div class="meta">Due: 14 May 2026, 12:00 noon</div>
+
+      <div class="members">
+        <strong>Group Members</strong>
+        <span>Name 1<br>Name 2<br>Name 3</span>
+      </div>
+
+      <div class="slide-number">01 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 2 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Presentation Roadmap</div>
+      <h2>What we will cover</h2>
+      <p class="slide-desc">
+        We evaluate whether a GenAI copilot for AML investigations is useful,
+        technically feasible, and safe for a regulated financial-services environment.
+      </p>
+
+      <div class="agenda-grid">
+        <div class="agenda-card">
+          <div class="agenda-num">01</div>
+          <h3>Business Problem</h3>
+          <p>Alert overload, fragmented data, documentation burden.</p>
+        </div>
+        <div class="agenda-card">
+          <div class="agenda-num">02</div>
+          <h3>GenAI Solution</h3>
+          <p>Copilot for summary, retrieval, entity linking, case-note drafting.</p>
+        </div>
+        <div class="agenda-card">
+          <div class="agenda-num">03</div>
+          <h3>Architecture &amp; Data</h3>
+          <p>RAG, knowledge graph, private LLM, secure deployment.</p>
+        </div>
+        <div class="agenda-card">
+          <div class="agenda-num">04</div>
+          <h3>Risks &amp; Controls</h3>
+          <p>Hallucination, leakage, prompt injection, over-reliance, governance.</p>
+        </div>
+        <div class="agenda-card">
+          <div class="agenda-num">05</div>
+          <h3>Feasibility &amp; KPIs</h3>
+          <p>Pilot scope, success metrics, cost-benefit, rollout plan.</p>
+        </div>
+        <div class="agenda-card">
+          <div class="agenda-num">06</div>
+          <h3>Recommendation</h3>
+          <p>Deploy as human-reviewed copilot, not autonomous decision engine.</p>
+        </div>
+      </div>
+
+      <div class="slide-number">02 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 3 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">Business Problem</div>
+      <h2>The AML investigator's dilemma</h2>
+      <p class="slide-desc">
+        Under HKMA AML/CFT guidelines and FATF Recommendations, banks must investigate
+        alerts quickly while maintaining accuracy, auditability, and regulatory defensibility.
+      </p>
+
+      <div class="three-card-grid">
+        <div class="card accent">
+          <span class="tag">Pain Point 1</span>
+          <h3>Alert overload</h3>
+          <p>
+            Transaction-monitoring systems generate thousands of alerts monthly.
+            Analysts manually review transaction history, KYC files, prior alerts,
+            and policy rules — with false-positive rates often exceeding 90%.
+          </p>
+        </div>
+        <div class="card accent">
+          <span class="tag">Pain Point 2</span>
+          <h3>Hidden connections</h3>
+          <p>
+            Risk indicators are spread across customer systems, account data,
+            counterparties, case histories, and unstructured investigation notes
+            across multiple platforms.
+          </p>
+        </div>
+        <div class="card accent">
+          <span class="tag">Pain Point 3</span>
+          <h3>Documentation burden</h3>
+          <p>
+            Analysts spend 40–60% of investigation time summarizing evidence and
+            drafting case notes, reducing time for deeper analysis and professional judgment.
+          </p>
+        </div>
+      </div>
+
+      <div class="big-statement">
+        <p>
+          The core problem is not detection — it is helping analysts assemble evidence,
+          understand context, and document decisions consistently under time pressure.
+        </p>
+      </div>
+
+      <div class="slide-number">03 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 4 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Proposed GenAI Solution</div>
+      <h2>An intelligent AML investigation copilot</h2>
+      <p class="slide-desc">
+        The system assists analysts with repetitive, evidence-heavy tasks while leaving
+        final decisions under human control.
+      </p>
+
+      <div class="two-col-grid">
+        <div class="card">
+          <h3>What the copilot does</h3>
+          <ul>
+            <li>Summarizes new AML alerts into a standard structure</li>
+            <li>Retrieves relevant internal policies and similar historical cases via RAG</li>
+            <li>Extracts entities: customers, accounts, counterparties</li>
+            <li>Drafts neutral, factual case notes with source citations</li>
+            <li>Flags confidence levels and data gaps</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>What the copilot does NOT do</h3>
+          <ul>
+            <li>Automatically close or escalate cases</li>
+            <li>Independently file Suspicious Transaction Reports</li>
+            <li>Make customer-exit or sanctions decisions</li>
+            <li>Access external internet data for confidential analysis</li>
+            <li>Replace professional AML judgment or accountability</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="big-statement">
+        <p>
+          Positioning: a controlled decision-support copilot — not an autonomous AML decision engine.
+        </p>
+      </div>
+
+      <div class="slide-number">04 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 5 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">User Workflow</div>
+      <h2>How an analyst uses the copilot</h2>
+      <p class="slide-desc">
+        The design integrates into the existing AML workflow — it augments, not replaces.
+      </p>
+
+      <div class="workflow-grid">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Alert intake</h3>
+          <p>New alert arrives from the transaction-monitoring system.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Evidence retrieval</h3>
+          <p>RAG retrieves alert data, KYC profile, transactions, policies, and prior cases.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>AI summary</h3>
+          <p>LLM generates structured, source-grounded alert summary with confidence flags.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Graph linking</h3>
+          <p>Entities and relationships are extracted and added to the knowledge graph.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <h3>Human review</h3>
+          <p>Analyst verifies evidence, edits draft, applies professional judgment, approves.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <h3>Audit capture</h3>
+          <p>All prompts, outputs, sources, edits, and approvals are logged.</p>
+        </div>
+      </div>
+
+      <div class="big-statement">
+        <p>
+          Human-in-the-loop at every decision point. The AI accelerates evidence assembly —
+          humans remain accountable.
+        </p>
+      </div>
+
+      <div class="slide-number">05 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 6 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Technical Architecture</div>
+      <h2>Secure RAG + Knowledge Graph architecture</h2>
+      <p class="slide-desc">
+        All components are privately deployed within the bank's infrastructure. No data leaves
+        the secure environment.
+      </p>
+
+      <div class="diagram">
+        <div class="layer-stack">
+          <div class="layer">
+            <div class="mini-title">Data Sources</div>
+            <h3>Internal Bank Systems</h3>
+            <p>AML alerts, KYC profiles, transaction records, case histories, policy manuals, sanctions lists.</p>
+          </div>
+          <div class="layer">
+            <div class="mini-title">Pre-processing</div>
+            <h3>ETL &amp; Entity Extraction</h3>
+            <p>PII masking, document chunking, embedding generation, entity extraction.</p>
+          </div>
+        </div>
+
+        <div class="arrow-col">→</div>
+
+        <div class="layer-stack">
+          <div class="layer">
+            <div class="mini-title">Vector Store</div>
+            <h3>RAG Retrieval Layer</h3>
+            <p>Semantic search over policies, prior cases, and alert evidence using embedding similarity.</p>
+          </div>
+          <div class="layer">
+            <div class="mini-title">Graph DB</div>
+            <h3>Knowledge Graph</h3>
+            <p>Entity relationships: customers ↔ accounts ↔ transactions ↔ counterparties ↔ jurisdictions.</p>
+          </div>
+        </div>
+
+        <div class="arrow-col">→</div>
+
+        <div class="layer-stack">
+          <div class="layer">
+            <div class="mini-title">LLM Orchestration</div>
+            <h3>Private LLM Service</h3>
+            <p>Generates summaries and drafts grounded only in retrieved evidence.</p>
+          </div>
+          <div class="layer">
+            <div class="mini-title">Frontend</div>
+            <h3>Analyst Investigation UI</h3>
+            <p>Summary, graph view, source panel, confidence indicators, editable draft.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Design principle: the LLM is grounded by retrieval, constrained by prompts, and validated by humans.
+      </div>
+      <div class="slide-number">06 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 7 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">Model Selection &amp; Deployment</div>
+      <h2>Why private deployment — and which model?</h2>
+      <p class="slide-desc">
+        For AML investigations involving sensitive customer data, model deployment strategy
+        is a critical architectural decision.
+      </p>
+
+      <div class="two-col-grid">
+        <div class="card accent">
+          <h3>Option A: Private Cloud LLM</h3>
+          <ul>
+            <li><strong>Examples:</strong> Azure OpenAI private endpoint, on-premise Llama</li>
+            <li><strong>Pros:</strong> Better data control, access management, data residency alignment</li>
+            <li><strong>Cons:</strong> Higher infrastructure cost, requires MLOps capability</li>
+            <li><strong>Verdict:</strong> Recommended for production AML use</li>
+          </ul>
+        </div>
+
+        <div class="card accent">
+          <h3>Option B: Public API</h3>
+          <ul>
+            <li><strong>Examples:</strong> External LLM API services</li>
+            <li><strong>Pros:</strong> Easy setup, low upfront cost, latest model capabilities</li>
+            <li><strong>Cons:</strong> Data leaves bank perimeter, regulatory risk, vendor lock-in</li>
+            <li><strong>Verdict:</strong> Use only for non-sensitive prototyping</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="big-statement">
+        <p>
+          Recommendation: Use a private cloud or on-premise LLM setup to satisfy data governance
+          and security requirements.
+        </p>
+      </div>
+
+      <div class="slide-number">07 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 8 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Knowledge Graph Design</div>
+      <h2>Turning isolated data into relationship intelligence</h2>
+      <p class="slide-desc">
+        The knowledge graph helps analysts see cross-case links that are invisible in tabular systems.
+      </p>
+
+      <div class="kg-layout">
+        <div class="kg-info card">
+          <h3>Core Entities</h3>
+          <ul>
+            <li>Customer</li>
+            <li>Account</li>
+            <li>Transaction</li>
+            <li>Counterparty / Merchant</li>
+            <li>Jurisdiction</li>
+            <li>AML Alert / Investigation Case</li>
+          </ul>
+
+          <h3 style="margin-top: 24px;">Relationship Types</h3>
+          <ul>
+            <li><code>OWNS</code>, <code>TRANSFERS_TO</code>, <code>RECEIVES_FROM</code></li>
+            <li><code>SHARES_IDENTIFIER_WITH</code></li>
+            <li><code>LINKED_TO_ALERT</code>, <code>LOCATED_IN</code></li>
+            <li><code>FLAGGED_BY_RULE</code></li>
+          </ul>
+
+          <h3 style="margin-top: 24px;">Value for Investigators</h3>
+          <p>
+            Discover shared counterparties, address overlaps, and transaction chains across seemingly unrelated cases.
+          </p>
+        </div>
+
+        <div class="kg-svg-wrap">
+          <svg viewBox="0 0 760 500" xmlns="http://www.w3.org/2000/svg">
+            <line x1="380" y1="90" x2="380" y2="205" stroke="#cbd5e1" stroke-width="4"></line>
+            <line x1="380" y1="275" x2="380" y2="390" stroke="#cbd5e1" stroke-width="4"></line>
+            <line x1="285" y1="245" x2="150" y2="245" stroke="#cbd5e1" stroke-width="4"></line>
+            <line x1="475" y1="245" x2="610" y2="245" stroke="#cbd5e1" stroke-width="4"></line>
+            <line x1="475" y1="270" x2="610" y2="405" stroke="#cbd5e1" stroke-width="4"></line>
+            <line x1="285" y1="270" x2="150" y2="405" stroke="#cbd5e1" stroke-width="4" stroke-dasharray="10,6"></line>
+
+            <ellipse cx="380" cy="70" rx="105" ry="35" fill="#2563eb"></ellipse>
+            <text x="380" y="78" text-anchor="middle" fill="#fff" font-size="21" font-weight="800">Customer C-09281</text>
+
+            <ellipse cx="380" cy="245" rx="105" ry="35" fill="#17233a"></ellipse>
+            <text x="380" y="253" text-anchor="middle" fill="#fff" font-size="21" font-weight="800">Account HK-8821</text>
+
+            <ellipse cx="380" cy="425" rx="105" ry="35" fill="#047857"></ellipse>
+            <text x="380" y="433" text-anchor="middle" fill="#fff" font-size="21" font-weight="800">Alert AML-0412</text>
+
+            <ellipse cx="95" cy="245" rx="90" ry="35" fill="#7c3aed"></ellipse>
+            <text x="95" y="253" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">Company A</text>
+
+            <ellipse cx="675" cy="245" rx="90" ry="35" fill="#c2410c"></ellipse>
+            <text x="675" y="253" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">Account B</text>
+
+            <ellipse cx="675" cy="430" rx="90" ry="35" fill="#0f766e"></ellipse>
+            <text x="675" y="438" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">Country X</text>
+
+            <ellipse cx="95" cy="430" rx="90" ry="35" fill="#6b7280" opacity=".78"></ellipse>
+            <text x="95" y="438" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">Prior Case</text>
+
+            <text x="400" y="150" font-size="17" fill="#667085" font-weight="700">OWNS</text>
+            <text x="400" y="350" font-size="17" fill="#667085" font-weight="700">TRIGGERED</text>
+            <text x="170" y="225" font-size="17" fill="#667085" font-weight="700">RECEIVES_FROM</text>
+            <text x="485" y="225" font-size="17" fill="#667085" font-weight="700">TRANSFERS_TO</text>
+            <text x="560" y="350" font-size="17" fill="#667085" font-weight="700">LOCATED_IN</text>
+            <text x="150" y="350" font-size="17" fill="#667085" font-weight="700">RELATED_CASE</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="slide-number">08 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 9 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">Concrete Example</div>
+      <h2>Sample AML alert → GenAI output</h2>
+      <p class="slide-desc">
+        A specific example demonstrates how the copilot transforms raw alert data into an actionable summary.
+      </p>
+
+      <div class="split-example">
+        <div class="code-card">
+          <strong>INPUT: AML Alert Data</strong><br><br>
+          Alert ID: AML-2026-0412<br>
+          Customer: C-09281, retail<br>
+          Account: HK-8821<br>
+          Rule: Rapid fund movement + high-risk jurisdiction<br><br>
+
+          Transactions:<br>
+          • 2026-04-10: IN USD 48,500 from Company A<br>
+          • 2026-04-11: OUT USD 47,900 to Acct B, Country X<br>
+          • 2026-04-12: Cash withdrawal USD 8,000<br><br>
+
+          KYC:<br>
+          • Monthly income: USD 4,000<br>
+          • Expected: salary + local payments<br><br>
+
+          History:<br>
+          • Jan 2026: unusual remittance, closed no STR
+        </div>
+
+        <div class="output-card">
+          <h3>OUTPUT: Generated Alert Summary</h3>
+          <ol>
+            <li><strong>Subjects &amp; Accounts:</strong> Customer C-09281 owns account HK-8821; alert triggered for rapid fund movement to high-risk jurisdiction.</li>
+            <li><strong>Transaction Details:</strong> Received USD 48,500 and transferred USD 47,900 overseas next day, followed by USD 8,000 cash withdrawal.</li>
+            <li><strong>Suspicious Indicators:</strong> Value inconsistent with declared income; pattern suggests possible pass-through activity.</li>
+            <li><strong>Historical Context:</strong> One prior alert for unusual remittance — closed without STR filing.</li>
+            <li><strong>Recommended Next Steps:</strong> Verify source of funds, review counterparty profile, assess rationale for overseas transfer.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="slide-number">09 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 10 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Prompt Engineering</div>
+      <h2>Prompts designed for factual, auditable output</h2>
+      <p class="slide-desc">
+        The system prompt constrains the model to use only approved evidence and avoid unsupported conclusions.
+      </p>
+
+      <div class="example-box">
+        <strong>System Prompt: AML Alert Summary</strong><br><br>
+        You are an AML investigation assistant for [Bank Name]. Summarize the provided alert data.<br><br>
+        RULES:<br>
+        1. Use ONLY the provided alert, KYC, transaction, policy, and case data.<br>
+        2. Do NOT use external knowledge or make unsupported assumptions.<br>
+        3. Output sections: Subjects &amp; Accounts | Transaction Details | Suspicious Indicators | Historical Alerts.<br>
+        4. Include [Source: ...] reference for each material claim.<br>
+        5. If data is missing, write "Not available".<br>
+        6. Use neutral, factual language. Do NOT accuse the customer.<br>
+        7. Do NOT recommend case closure or STR filing — human analyst must decide.<br>
+        8. Flag confidence as HIGH / MEDIUM / LOW for each section.
+      </div>
+
+      <p class="additional-prompt">
+        <strong>Additional prompt types:</strong> Entity extraction prompt, Case-note drafting prompt,
+        Policy retrieval query template, Counterparty risk assessment prompt.
+      </p>
+
+      <div class="slide-number">10 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 11 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">Risk Assessment</div>
+      <h2>Key risks introduced by GenAI in AML investigations</h2>
+      <p class="slide-desc">
+        AML is a regulated, high-stakes workflow. GenAI introduces new risk categories
+        that require explicit governance.
+      </p>
+
+      <div class="six-card-grid">
+        <div class="card accent">
+          <h3>Hallucination</h3>
+          <p>Model invents transactions, entity links, or policy rules that do not exist in the evidence base.</p>
+        </div>
+        <div class="card accent">
+          <h3>Prompt Injection</h3>
+          <p>Malicious text embedded in case documents or inputs manipulates model behavior unexpectedly.</p>
+        </div>
+        <div class="card accent">
+          <h3>Data Leakage</h3>
+          <p>Customer PII or confidential investigation techniques exposed to unauthorized systems or users.</p>
+        </div>
+        <div class="card accent">
+          <h3>Over-reliance</h3>
+          <p>Analysts accept AI output without verification, reducing investigation quality and accountability.</p>
+        </div>
+        <div class="card accent">
+          <h3>Weak Auditability</h3>
+          <p>Cannot reconstruct what the model generated versus what the analyst reviewed and changed.</p>
+        </div>
+        <div class="card accent">
+          <h3>Bias &amp; Fairness</h3>
+          <p>Model may over-flag certain geographies or customer demographics without evidentiary basis.</p>
+        </div>
+      </div>
+
+      <div class="slide-number">11 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 12 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Risk-Control Matrix</div>
+      <h2>Multi-layered controls for safe deployment</h2>
+      <p class="slide-desc">
+        Controls span model, data, user, workflow, and governance layers.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <tbody><tr>
+            <th style="width:16%;">Risk</th>
+            <th style="width:17%;">Scenario</th>
+            <th style="width:14%;">Impact</th>
+            <th style="width:34%;">Controls</th>
+            <th style="width:19%;">Owner</th>
+          </tr>
+          <tr>
+            <td><span class="risk-pill high">High</span>Hallucination</td>
+            <td>AI fabricates entity link</td>
+            <td>Wrong investigation path</td>
+            <td>RAG grounding; source citations; confidence flags; human approval gate</td>
+            <td>AML + Model Risk</td>
+          </tr>
+          <tr>
+            <td><span class="risk-pill high">High</span>Data leakage</td>
+            <td>PII in unauthorized output</td>
+            <td>Privacy breach</td>
+            <td>Private deployment; encryption; PII masking; RBAC; audit logging</td>
+            <td>IT Security + DPO</td>
+          </tr>
+          <tr>
+            <td><span class="risk-pill med">Med</span>Prompt injection</td>
+            <td>Document hijacks model</td>
+            <td>Non-compliant output</td>
+            <td>Input sanitization; instruction hierarchy; adversarial red-teaming</td>
+            <td>Cybersecurity</td>
+          </tr>
+          <tr>
+            <td><span class="risk-pill med">Med</span>Over-reliance</td>
+            <td>Analyst copies without review</td>
+            <td>Reduced quality</td>
+            <td>Mandatory review step; sampling QA; analyst training program</td>
+            <td>AML Manager</td>
+          </tr>
+          <tr>
+            <td><span class="risk-pill med">Med</span>Auditability gap</td>
+            <td>No prompt/output record</td>
+            <td>Cannot explain decision</td>
+            <td>Prompt-output-edit-approval logs; immutable retention policy</td>
+            <td>Internal Audit</td>
+          </tr>
+          <tr>
+            <td><span class="risk-pill low">Low</span>Bias/Fairness</td>
+            <td>Over-flagging by geography</td>
+            <td>Unfair treatment</td>
+            <td>Bias monitoring; fairness review; periodic explainability reports</td>
+            <td>Compliance + DS</td>
+          </tr>
+        </tbody></table>
+      </div>
+
+      <div class="slide-number">12 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 13 -->
+  <section class="slide-frame">
+    <div class="slide light">
+      <div class="topbar"></div>
+      <div class="section-label">Practical Feasibility</div>
+      <h2>Pilot plan and measurable success criteria</h2>
+      <p class="slide-desc">
+        We recommend a controlled pilot before any broader production deployment —
+        measuring both efficiency and safety.
+      </p>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="value">8–12 wk</div>
+          <h3>Pilot Duration</h3>
+          <p>Run with one AML team on retail banking alerts in a sandboxed environment.</p>
+        </div>
+        <div class="kpi">
+          <div class="value">5–10</div>
+          <h3>Analyst Users</h3>
+          <p>Small group enables close monitoring, rapid feedback loops, and quality sampling.</p>
+        </div>
+        <div class="kpi">
+          <div class="value">30–50%</div>
+          <h3>Time Saving Target</h3>
+          <p>For summarization and drafting only — not overall investigation time.</p>
+        </div>
+        <div class="kpi">
+          <div class="value">100%</div>
+          <h3>Audit Logging</h3>
+          <p>Every prompt, source, output, edit, and approval immutably recorded.</p>
+        </div>
+        <div class="kpi">
+          <div class="value">0</div>
+          <h3>Unsupported Claims</h3>
+          <p>Zero tolerance for material claims without evidence references in output.</p>
+        </div>
+        <div class="kpi">
+          <div class="value">≥ 4/5</div>
+          <h3>User Satisfaction</h3>
+          <p>Feedback on usefulness, accuracy, explainability, and workflow integration.</p>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Success criteria must be met before Phase 2 scale-up is approved.
+      </div>
+      <div class="slide-number">13 / 14</div>
+    </div>
+  </section>
+
+  <!-- Slide 14 -->
+  <section class="slide-frame">
+    <div class="slide white">
+      <div class="topbar"></div>
+      <div class="section-label">Conclusion &amp; Recommendation</div>
+      <h2>Deploy carefully as a human-reviewed AML copilot</h2>
+
+      <div class="conclusion-grid">
+        <div class="card">
+          <h3>Key Takeaways</h3>
+          <ul>
+            <li><strong>Business value:</strong> Reduces repetitive evidence assembly and improves consistency of case documentation.</li>
+            <li><strong>Technical design:</strong> RAG grounds the LLM in internal evidence; knowledge graph supports relationship discovery.</li>
+            <li><strong>Risk awareness:</strong> Hallucination, data leakage, prompt injection, auditability, and over-reliance require explicit controls.</li>
+            <li><strong>Regulatory alignment:</strong> Designed to support explainability and human accountability at every stage.</li>
+            <li><strong>Practical feasibility:</strong> A narrow pilot with measurable KPIs is more credible than immediate enterprise-wide deployment.</li>
+          </ul>
+        </div>
+
+        <div class="recommend">
+          <h3>Recommendation</h3>
+          <p>
+            Proceed with a phased pilot under strong governance, private deployment,
+            full audit logging, and mandatory human approval.
+          </p>
+
+          <div class="phase">
+            <strong>Phase 1: Controlled Pilot</strong>
+            <p>Test summarization, retrieval, entity extraction with limited users and cases.</p>
+          </div>
+
+          <div class="phase">
+            <strong>Phase 2: Validation &amp; Governance</strong>
+            <p>Assess accuracy, edit rates, security findings, analyst feedback, regulator readiness.</p>
+          </div>
+
+          <div class="phase">
+            <strong>Phase 3: Gradual Scale-up</strong>
+            <p>Expand only if pilot demonstrates safety, usefulness, and auditability.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        GenAI should support AML investigators — not replace them. Copilot, not autopilot.
+      </div>
+      <div class="slide-number">14 / 14</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  /*
+    PowerPoint-like scaling engine.
+
+    The slide itself is always 1600 x 900.
+    We only scale the entire canvas to fit the browser.
+    This avoids normal HTML reflow causing:
+    - text boxes with excessive blank space,
+    - content overflowing unpredictably,
+    - different aspect ratios across devices.
+  */
+  (function () {
+    const SLIDE_W = 1600;
+    const SLIDE_H = 900;
+
+    function scaleSlides() {
+      const frames = document.querySelectorAll(".slide-frame");
+      const availableW = Math.max(320, window.innerWidth);
+      const availableH = Math.max(360, window.innerHeight);
+
+      /*
+        Slight vertical margin so consecutive slides do not touch browser edges.
+        In normal browsing mode, each slide fits inside current viewport height.
+      */
+      const viewportPaddingX = 32;
+      const viewportPaddingY = 48;
+
+      const scale = Math.min(
+        (availableW - viewportPaddingX) / SLIDE_W,
+        (availableH - viewportPaddingY) / SLIDE_H,
+        1
+      );
+
+      const scaledW = SLIDE_W * scale;
+      const scaledH = SLIDE_H * scale;
+
+      frames.forEach((frame) => {
+        frame.style.height = scaledH + "px";
+
+        const slide = frame.querySelector(".slide");
+        slide.style.transform = "scale(" + scale + ")";
+      });
+    }
+
+    window.addEventListener("resize", scaleSlides);
+    window.addEventListener("orientationchange", scaleSlides);
+    window.addEventListener("load", scaleSlides);
+    scaleSlides();
+  })();
+</script>
+
+
+
+</body></html>
